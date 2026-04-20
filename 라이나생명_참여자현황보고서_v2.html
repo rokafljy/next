@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>라이나생명 | 참여자 신청 현황보고서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0B1F3A;
+  --teal: #00A99D;
+  --teal-light: #4EC9C3;
+  --teal-dark: #007A73;
+  --indigo: #3B5BDB;
+  --amber: #F5A623;
+  --red: #E8503A;
+  --bg: #F4F7FB;
+  --white: #FFFFFF;
+  --gray-1: #F0F3F8;
+  --gray-2: #D8DFE9;
+  --gray-3: #9BA8BC;
+  --text-main: #1A2B45;
+  --text-sub: #5A6A82;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text-main); line-height:1.6; }
+
+/* ─── HEADER ─── */
+.report-header {
+  background: linear-gradient(135deg, #071629 0%, #0B1F3A 55%, #0f2d52 100%);
+  color:white; padding:48px 56px 40px; position:relative; overflow:hidden;
+}
+.report-header::before {
+  content:''; position:absolute; top:-80px; right:-80px;
+  width:380px; height:380px;
+  background:radial-gradient(circle, rgba(0,169,157,0.16) 0%, transparent 68%);
+  border-radius:50%;
+}
+.report-header::after {
+  content:''; position:absolute; bottom:-60px; left:25%;
+  width:250px; height:250px;
+  background:radial-gradient(circle, rgba(78,201,195,0.08) 0%, transparent 70%);
+  border-radius:50%;
+}
+.header-badge {
+  display:inline-block;
+  background:rgba(0,169,157,0.18); border:1px solid rgba(0,169,157,0.45);
+  color:var(--teal-light); font-size:11px; font-weight:700; letter-spacing:2px;
+  text-transform:uppercase; padding:5px 14px; border-radius:100px; margin-bottom:18px;
+}
+.report-title {
+  font-family:'DM Serif Display',serif; font-size:38px; font-weight:400;
+  line-height:1.2; margin-bottom:6px; letter-spacing:-0.5px;
+}
+.report-title span { color:var(--teal-light); }
+.report-subtitle { font-size:14px; color:rgba(255,255,255,0.55); font-weight:300; margin-bottom:32px; }
+.header-meta { display:flex; gap:32px; flex-wrap:wrap; }
+.meta-item { font-size:12px; color:rgba(255,255,255,0.40); }
+.meta-item strong { color:rgba(255,255,255,0.80); font-size:13px; display:block; margin-bottom:2px; }
+
+/* ─── PROG BANNER ─── */
+.prog-banner {
+  display:grid; grid-template-columns:1fr 1fr; gap:0;
+  border-bottom:3px solid var(--gray-2);
+}
+.prog-card {
+  padding:22px 40px; display:flex; align-items:center; gap:18px;
+}
+.prog-card:first-child {
+  background:linear-gradient(90deg, rgba(0,169,157,0.08) 0%, transparent 100%);
+  border-right:1px solid var(--gray-2);
+}
+.prog-card:last-child {
+  background:linear-gradient(90deg, rgba(59,91,219,0.06) 0%, transparent 100%);
+}
+.prog-num {
+  font-size:42px; font-weight:900; line-height:1;
+}
+.prog-num.teal { color:var(--teal); }
+.prog-num.indigo { color:var(--indigo); }
+.prog-info h4 { font-size:13px; font-weight:700; color:var(--text-main); }
+.prog-info p { font-size:11px; color:var(--text-sub); margin-top:2px; }
+.prog-bar-wrap { flex:1; }
+.prog-bar-track { background:var(--gray-2); border-radius:100px; height:6px; overflow:hidden; }
+.prog-bar-fill-teal { height:100%; border-radius:100px; background:var(--teal); }
+.prog-bar-fill-indigo { height:100%; border-radius:100px; background:var(--indigo); }
+
+/* ─── MAIN ─── */
+.main-container { padding:36px 56px 64px; max-width:1300px; }
+
+/* ─── KPI ─── */
+.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:28px; }
+.kpi-card {
+  background:white; border-radius:14px; padding:22px 18px;
+  box-shadow:0 2px 10px rgba(11,31,58,0.06); border:1px solid var(--gray-2);
+  position:relative; overflow:hidden;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(11,31,58,0.10); }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--teal); }
+.kpi-card.warn::before { background:var(--amber); }
+.kpi-card.alert::before { background:var(--red); }
+.kpi-card.indigo::before { background:var(--indigo); }
+.kpi-label { font-size:10px; font-weight:700; letter-spacing:0.5px; color:var(--gray-3); text-transform:uppercase; margin-bottom:8px; }
+.kpi-value { font-size:32px; font-weight:900; color:var(--navy); line-height:1; }
+.kpi-value .unit { font-size:15px; font-weight:600; color:var(--text-sub); }
+.kpi-sub { font-size:11px; color:var(--text-sub); margin-top:5px; }
+
+/* ─── SECTION ─── */
+.section-title {
+  font-size:12px; font-weight:700; color:var(--text-sub); text-transform:uppercase;
+  letter-spacing:1.5px; margin-bottom:14px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title::before { content:''; width:3px; height:14px; background:var(--teal); border-radius:2px; }
+
+/* ─── CHARTS ─── */
+.charts-row { display:grid; grid-template-columns:2fr 1fr; gap:18px; margin-bottom:18px; }
+.charts-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; margin-bottom:18px; }
+.charts-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+.chart-card {
+  background:white; border-radius:14px; padding:24px;
+  box-shadow:0 2px 10px rgba(11,31,58,0.06); border:1px solid var(--gray-2);
+}
+.chart-card h3 { font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:18px; }
+
+/* ─── BARS ─── */
+.bar-list { display:flex; flex-direction:column; gap:9px; }
+.bar-label-row { display:flex; justify-content:space-between; margin-bottom:3px; }
+.bar-label { font-size:12px; color:var(--text-main); font-weight:500; }
+.bar-count { font-size:11px; color:var(--text-sub); font-weight:600; }
+.bar-track { background:var(--gray-1); border-radius:100px; height:7px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--teal),var(--teal-light)); }
+.bar-fill.b-indigo { background:linear-gradient(90deg,#3B5BDB,#748FFC); }
+.bar-fill.b-navy { background:linear-gradient(90deg,var(--navy),#2D5A8E); }
+.bar-fill.b-amber { background:linear-gradient(90deg,#F5A623,#F8C862); }
+.bar-fill.b-soft { background:linear-gradient(90deg,#6B8FC7,#A3C0E8); }
+.bar-fill.b-green { background:linear-gradient(90deg,#2ECC71,#82E0AA); }
+.bar-fill.b-gray { background:var(--gray-2); }
+
+/* ─── DONUT ─── */
+.donut-container { display:flex; flex-direction:column; align-items:center; gap:18px; }
+.donut-svg-wrap { position:relative; }
+.donut-label-center {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;
+}
+.donut-center-num { font-size:26px; font-weight:900; color:var(--navy); line-height:1; }
+.donut-center-text { font-size:9px; color:var(--gray-3); font-weight:700; letter-spacing:0.5px; }
+.legend-list { display:flex; flex-direction:column; gap:7px; width:100%; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:12px; }
+.legend-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.legend-text { flex:1; color:var(--text-main); font-weight:500; }
+.legend-val { font-weight:700; color:var(--navy); }
+.legend-pct { color:var(--gray-3); font-size:10px; margin-left:2px; }
+
+/* ─── TIMELINE ─── */
+.timeline-bar-wrap {
+  display:flex; align-items:flex-end; gap:5px;
+  height:110px; padding-bottom:22px; position:relative;
+}
+.timeline-bar-wrap::after {
+  content:''; position:absolute; bottom:22px; left:0; right:0;
+  height:1px; background:var(--gray-2);
+}
+.t-bar-col { display:flex; flex-direction:column; align-items:center; flex:1; }
+.t-bar { width:100%; border-radius:3px 3px 0 0; min-height:3px; }
+.t-bar.c-teal { background:linear-gradient(180deg,var(--teal-light),var(--teal)); }
+.t-bar.c-amber { background:linear-gradient(180deg,#F8C862,var(--amber)); }
+.t-bar-label { font-size:8px; color:var(--gray-3); margin-top:4px; white-space:nowrap; }
+.t-bar-num { font-size:9px; font-weight:700; color:var(--text-sub); margin-bottom:2px; }
+
+/* ─── STATUS ─── */
+.status-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.status-item {
+  background:var(--gray-1); border-radius:12px; padding:14px 16px;
+  display:flex; align-items:center; gap:12px;
+}
+.status-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.status-icon.green { background:rgba(46,204,113,0.15); }
+.status-icon.amber { background:rgba(245,166,35,0.15); }
+.status-icon.red { background:rgba(232,80,58,0.15); }
+.status-label { font-size:10px; color:var(--text-sub); font-weight:600; text-transform:uppercase; letter-spacing:0.3px; }
+.status-val { font-size:20px; font-weight:900; color:var(--navy); line-height:1; }
+.status-pct { font-size:10px; color:var(--gray-3); }
+
+/* ─── TABLE ─── */
+.table-wrap {
+  background:white; border-radius:14px; border:1px solid var(--gray-2);
+  overflow:hidden; box-shadow:0 2px 10px rgba(11,31,58,0.06); margin-top:18px;
+}
+.table-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 22px; border-bottom:1px solid var(--gray-2);
+}
+.table-header h3 { font-size:13px; font-weight:700; }
+.badge-count { background:var(--teal); color:white; font-size:10px; font-weight:700; padding:3px 10px; border-radius:100px; }
+.badge-count.indigo { background:var(--indigo); }
+table { width:100%; border-collapse:collapse; }
+thead tr { background:var(--gray-1); }
+th { text-align:left; padding:9px 14px; font-size:10px; font-weight:700; color:var(--text-sub); text-transform:uppercase; letter-spacing:0.5px; }
+td { padding:10px 14px; font-size:12px; border-bottom:1px solid var(--gray-1); color:var(--text-main); }
+tr:last-child td { border-bottom:none; }
+tbody tr:hover { background:var(--gray-1); }
+
+/* ─── TAGS ─── */
+.tag { display:inline-block; padding:2px 7px; border-radius:100px; font-size:9px; font-weight:700; }
+.tag-y { background:rgba(232,80,58,0.12); color:#C0392B; }
+.tag-n { background:rgba(46,204,113,0.12); color:#1A7A4A; }
+.tag-ku { background:rgba(0,169,157,0.12); color:var(--teal-dark); }
+.tag-other { background:rgba(107,143,199,0.12); color:#2D5A8E; }
+.tag-web { background:rgba(59,91,219,0.12); color:#2C46B8; }
+.tag-ai { background:rgba(0,169,157,0.12); color:var(--teal-dark); }
+.tag-google { background:rgba(245,166,35,0.15); color:#9B6800; }
+
+.divider-row td { background:rgba(240,243,248,0.7); font-size:10px; color:var(--gray-3); font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:7px 14px; }
+
+/* ─── NOTICE ─── */
+.notice-box {
+  background:rgba(245,166,35,0.07); border:1px solid rgba(245,166,35,0.25);
+  border-radius:10px; padding:12px 16px; margin-top:10px;
+}
+.notice-box p { font-size:11px; color:#8B6200; font-weight:600; }
+
+.info-box {
+  background:rgba(59,91,219,0.06); border:1px solid rgba(59,91,219,0.18);
+  border-radius:10px; padding:12px 16px; margin-top:8px;
+}
+.info-box p { font-size:11px; color:#2C46B8; font-weight:600; }
+
+/* ─── FOOTER ─── */
+.report-footer {
+  background:var(--navy); color:rgba(255,255,255,0.35);
+  text-align:center; padding:22px; font-size:11px; letter-spacing:0.3px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="report-header">
+  <div class="header-badge">2026 청년일경험지원사업</div>
+  <h1 class="report-title">라이나생명 프로젝트<br><span>참여자 신청 현황보고서</span></h1>
+  <p class="report-subtitle">포털 신청 + 구글폼 신청 통합 | 2개 프로그램 운영</p>
+  <div class="header-meta">
+    <div class="meta-item"><strong>기준일</strong>2026.04.20</div>
+    <div class="meta-item"><strong>주관기관</strong>건국대학교 산학협력단</div>
+    <div class="meta-item"><strong>참여기업</strong>라이나생명보험(주)</div>
+    <div class="meta-item"><strong>신청 방법</strong>청년일경험 포털 + 구글폼(3명)</div>
+    <div class="meta-item"><strong>신청 기간</strong>2026.04.05 – 2026.04.19</div>
+  </div>
+</div>
+
+<!-- PROGRAM BANNER -->
+<div class="prog-banner" style="background:white; border-bottom:2px solid var(--gray-2);">
+  <div class="prog-card">
+    <div class="prog-num teal">41</div>
+    <div class="prog-info">
+      <h4>🌐 Digital Web Enhancement 프로젝트</h4>
+      <p>전체의 61.2% · UI/UX 디자인 및 웹 서비스 개선</p>
+    </div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-num indigo">26</div>
+    <div class="prog-info">
+      <h4>🤖 AI 기반 보험상품 정보 콘텐츠 확산 전략</h4>
+      <p>전체의 38.8% · AI 활용 콘텐츠 기획 및 마케팅</p>
+    </div>
+  </div>
+</div>
+
+<div class="main-container">
+
+  <!-- KPI -->
+  <div class="section-title">핵심 지표 요약</div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">총 신청자</div>
+      <div class="kpi-value">67<span class="unit">명</span></div>
+      <div class="kpi-sub">포털 64명 + 구글폼 3명</div>
+    </div>
+    <div class="kpi-card indigo">
+      <div class="kpi-label">참여 대학교</div>
+      <div class="kpi-value">25<span class="unit">개교</span></div>
+      <div class="kpi-sub">건국대 32명 (47.8%)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">평균 연령</div>
+      <div class="kpi-value">24.5<span class="unit">세</span></div>
+      <div class="kpi-sub">최소 19세 · 최대 34세</div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="kpi-label">확인내용 이상</div>
+      <div class="kpi-value">10<span class="unit">명</span></div>
+      <div class="kpi-sub">전체의 14.9% · 검토 필요</div>
+    </div>
+    <div class="kpi-card alert">
+      <div class="kpi-label">취업지원제도/고용보험</div>
+      <div class="kpi-value">7<span class="unit">명</span></div>
+      <div class="kpi-sub">각각 7명 (10.4%)</div>
+    </div>
+  </div>
+
+  <!-- ROW 1: 학교 + 학력 -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>📍 출신 대학교 분포 <span style="font-size:10px;color:var(--gray-3);font-weight:400;">(상위 10개교)</span></h3>
+      <div class="bar-list">
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">🟢 건국대학교</span><span class="bar-count">32명 (47.8%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">동국대학교</span><span class="bar-count">4명 (6.0%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:12.5%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">중앙대학교</span><span class="bar-count">3명 (4.5%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:9.4%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">홍익대학교</span><span class="bar-count">2명 (3.0%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:6.3%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">연세대학교</span><span class="bar-count">2명 (3.0%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:6.3%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">가천대학교</span><span class="bar-count">2명 (3.0%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:6.3%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">울산과학대학교</span><span class="bar-count">2명 (3.0%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:6.3%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">신한대학교</span><span class="bar-count">2명 (3.0%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:6.3%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">기타 (17개교)</span><span class="bar-count">18명 (26.9%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-amber" style="width:56.3%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>🎓 학력 현황</h3>
+      <div class="donut-container">
+        <div class="donut-svg-wrap">
+          <!-- 재학계(35+2+2+1=40) = 59.7% → 214.9° -->
+          <!-- 졸업(16) = 23.9% → 86.0° -->
+          <!-- 졸업예정(5) = 7.5% → 26.9° -->
+          <!-- 휴학(3) = 4.5% → 16.2° -->
+          <!-- 기타(3) = 4.5% -->
+          <svg width="170" height="170" viewBox="0 0 170 170">
+            <circle cx="85" cy="85" r="66" fill="none" stroke="#E8F8F7" stroke-width="26"/>
+            <circle cx="85" cy="85" r="66" fill="none" stroke="#00A99D" stroke-width="26"
+              stroke-dasharray="249.3 165.8" stroke-dashoffset="0" stroke-linecap="butt"
+              transform="rotate(-90 85 85)"/>
+            <circle cx="85" cy="85" r="66" fill="none" stroke="#0B1F3A" stroke-width="26"
+              stroke-dasharray="100.3 315.8" stroke-dashoffset="-249.3" stroke-linecap="butt"
+              transform="rotate(-90 85 85)"/>
+            <circle cx="85" cy="85" r="66" fill="none" stroke="#F5A623" stroke-width="26"
+              stroke-dasharray="31.4 384.7" stroke-dashoffset="-349.6" stroke-linecap="butt"
+              transform="rotate(-90 85 85)"/>
+            <circle cx="85" cy="85" r="66" fill="none" stroke="#6B8FC7" stroke-width="26"
+              stroke-dasharray="18.8 397.3" stroke-dashoffset="-381.0" stroke-linecap="butt"
+              transform="rotate(-90 85 85)"/>
+            <circle cx="85" cy="85" r="66" fill="none" stroke="#D8DFE9" stroke-width="26"
+              stroke-dasharray="18.8 397.3" stroke-dashoffset="-399.8" stroke-linecap="butt"
+              transform="rotate(-90 85 85)"/>
+          </svg>
+          <div class="donut-label-center">
+            <div class="donut-center-num">67</div>
+            <div class="donut-center-text">총 신청자</div>
+          </div>
+        </div>
+        <div class="legend-list">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#00A99D"></div>
+            <span class="legend-text">재학 (전체)</span>
+            <span class="legend-val">40명</span>
+            <span class="legend-pct">59.7%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#0B1F3A"></div>
+            <span class="legend-text">졸업</span>
+            <span class="legend-val">16명</span>
+            <span class="legend-pct">23.9%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#F5A623"></div>
+            <span class="legend-text">졸업예정</span>
+            <span class="legend-val">5명</span>
+            <span class="legend-pct">7.5%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#6B8FC7"></div>
+            <span class="legend-text">휴학</span>
+            <span class="legend-val">3명</span>
+            <span class="legend-pct">4.5%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#D8DFE9"></div>
+            <span class="legend-text">수료·석사·고졸</span>
+            <span class="legend-val">3명</span>
+            <span class="legend-pct">4.5%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: 연령 + 전공 + 신청일 -->
+  <div class="charts-row-3">
+    <div class="chart-card">
+      <h3>🎂 연령대 분포</h3>
+      <div class="bar-list">
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">22–24세</span><span class="bar-count">27명 (40.3%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">25–27세</span><span class="bar-count">25명 (37.3%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:92.6%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">19–21세</span><span class="bar-count">10명 (14.9%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:37.0%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">28세 이상</span><span class="bar-count">5명 (7.5%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-amber" style="width:18.5%"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-2);">
+        <div style="display:flex;justify-content:space-between;font-size:11px;">
+          <div><span style="color:var(--gray-3)">평균</span> <strong style="color:var(--navy)">24.5세</strong></div>
+          <div><span style="color:var(--gray-3)">최소</span> <strong style="color:var(--navy)">19세</strong></div>
+          <div><span style="color:var(--gray-3)">최대</span> <strong style="color:var(--navy)">34세</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>📚 전공계열 분포</h3>
+      <div class="bar-list">
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">경영·경제계열</span><span class="bar-count">18명 (26.9%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">IT·공학계열</span><span class="bar-count">17명 (25.4%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-indigo" style="width:94.4%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">디자인·미디어계열</span><span class="bar-count">12명 (17.9%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-amber" style="width:66.7%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">기타·미기재</span><span class="bar-count">9명 (13.4%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-gray" style="width:50.0%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">어문계열</span><span class="bar-count">6명 (9.0%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-green" style="width:33.3%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span class="bar-label">이학계열</span><span class="bar-count">5명 (7.5%)</span></div>
+          <div class="bar-track"><div class="bar-fill b-soft" style="width:27.8%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>📆 일별 신청 추이</h3>
+      <div class="timeline-bar-wrap">
+        <!-- max=36 -->
+        <div class="t-bar-col"><div class="t-bar-num">1</div><div class="t-bar c-teal" style="height:2.8%"></div><div class="t-bar-label">04/05</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">2</div><div class="t-bar c-teal" style="height:5.6%"></div><div class="t-bar-label">07</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">1</div><div class="t-bar c-teal" style="height:2.8%"></div><div class="t-bar-label">09</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">2</div><div class="t-bar c-teal" style="height:5.6%"></div><div class="t-bar-label">10</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">1</div><div class="t-bar c-teal" style="height:2.8%"></div><div class="t-bar-label">11</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">4</div><div class="t-bar c-teal" style="height:11.1%"></div><div class="t-bar-label">12</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">1</div><div class="t-bar c-teal" style="height:2.8%"></div><div class="t-bar-label">13</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">2</div><div class="t-bar c-teal" style="height:5.6%"></div><div class="t-bar-label">14</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">3</div><div class="t-bar c-teal" style="height:8.3%"></div><div class="t-bar-label">15</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">2</div><div class="t-bar c-teal" style="height:5.6%"></div><div class="t-bar-label">16</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">5</div><div class="t-bar c-teal" style="height:13.9%"></div><div class="t-bar-label">17</div></div>
+        <div class="t-bar-col"><div class="t-bar-num">4</div><div class="t-bar c-teal" style="height:11.1%"></div><div class="t-bar-label">18</div></div>
+        <div class="t-bar-col">
+          <div class="t-bar-num" style="color:var(--amber);font-weight:800">36</div>
+          <div class="t-bar c-amber" style="height:100%"></div>
+          <div class="t-bar-label" style="color:var(--amber);font-weight:700">19마감</div>
+        </div>
+      </div>
+      <div class="notice-box">
+        <p>⚡ 마감일(4/19) 신청 집중: <strong>36명 (53.7%)</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="chart-card" style="margin-bottom:18px;">
+    <h3>🔍 자격 요건 및 이상 현황</h3>
+    <div style="margin-top:14px;" class="status-grid">
+      <div class="status-item">
+        <div class="status-icon green">✅</div>
+        <div>
+          <div class="status-label">정상 신청자</div>
+          <div class="status-val">57<span style="font-size:13px;font-weight:600;color:var(--text-sub)">명</span></div>
+          <div class="status-pct">전체 85.1%</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-icon amber">⚠️</div>
+        <div>
+          <div class="status-label">확인내용 이상</div>
+          <div class="status-val">10<span style="font-size:13px;font-weight:600;color:var(--text-sub)">명</span></div>
+          <div class="status-pct">전체 14.9% · 검토 필요</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-icon red">📋</div>
+        <div>
+          <div class="status-label">국민취업지원제도 / 고용보험</div>
+          <div class="status-val">7<span style="font-size:13px;font-weight:600;color:var(--text-sub)">명</span></div>
+          <div class="status-pct">각 10.4% · 중복가입 확인</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 이상 케이스 -->
+    <div style="margin-top:18px;">
+      <div class="section-title">확인내용 이상 케이스 (10명) 상세</div>
+      <table>
+        <thead>
+          <tr><th>이름</th><th>나이</th><th>학력</th><th>학교</th><th>학과</th><th>프로그램</th><th>취업지원</th><th>고용보험</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>강예나</strong></td><td>30세</td><td>4년제 졸업</td><td><span class="tag tag-other">홍익대학교</span></td><td>디자인학부 시각디자인</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>김무진</strong></td><td>27세</td><td>4년제 졸업</td><td><span class="tag tag-other">국립강릉원주대학교</span></td><td>조형예술·디자인학과</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>김솔</strong></td><td>21세</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대학교</span></td><td>커뮤니케이션디자인학과</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>성하현</strong></td><td>33세</td><td>4년제 졸업</td><td><span class="tag tag-other">한동대학교</span></td><td>콘텐츠융합디자인학부</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>소지섭</strong></td><td>28세</td><td>4년제 졸업</td><td><span class="tag tag-other">가천대학교</span></td><td>응용통계학과</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>이재근</strong></td><td>27세</td><td>4년제 졸업예정</td><td><span class="tag tag-other">경북대학교</span></td><td>식품자원경제학과</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>임소정</strong></td><td>25세</td><td>4년제 졸업</td><td><span class="tag tag-other">동덕여자대학교</span></td><td>정보학부 컴퓨터학전공</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-y">Y</span></td></tr>
+          <tr><td><strong>최강희</strong></td><td>27세</td><td>4년제 졸업</td><td><span class="tag tag-other">동국대학교</span></td><td>컴퓨터공학과</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>김민아</strong></td><td>27세</td><td>4년제 수료</td><td><span class="tag tag-other">중앙대학교</span></td><td>경영학부</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td><strong>박지원</strong></td><td>23세</td><td>4년제 재학</td><td><span class="tag tag-other">동국대학교</span></td><td>수학과</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+        </tbody>
+      </table>
+      <div style="background:rgba(232,80,58,0.06);border:1px solid rgba(232,80,58,0.20);border-radius:8px;padding:10px 14px;margin-top:10px;">
+        <p style="font-size:11px;color:#9B2B1F;font-weight:600;">⚠ <strong>임소정</strong>은 국민취업지원제도 + 고용보험 동시 해당 — 최우선 검토 대상</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL LIST -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>📋 전체 신청자 명단</h3>
+      <div style="display:flex;gap:8px;">
+        <span class="badge-count indigo">Web 41명</span>
+        <span class="badge-count">AI 26명</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr><th>#</th><th>이름</th><th>나이</th><th>학력</th><th>학교</th><th>학과</th><th>신청일</th><th>프로그램</th><th>취업지원</th><th>고용보험</th><th>이상</th></tr>
+        </thead>
+        <tbody>
+          <tr class="divider-row"><td colspan="11">— Digital Web Enhancement 프로젝트 (41명) —</td></tr>
+          <tr><td>1</td><td><strong>강예나</strong></td><td>30</td><td>4년제 졸업</td><td><span class="tag tag-other">홍익대</span></td><td>디자인학부 시각디자인</td><td>04/16</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>2</td><td><strong>강준영</strong></td><td>26</td><td>4년제 졸업</td><td><span class="tag tag-other">홍익대</span></td><td>디자인컨버전스학부</td><td>04/18</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>3</td><td><strong>강현수</strong></td><td>25</td><td>4년제 휴학</td><td><span class="tag tag-ku">건국대</span></td><td>스마트ICT융합공학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>4</td><td><strong>공윤서</strong></td><td>27</td><td>4년제 졸업</td><td><span class="tag tag-other">한양대(ERICA)</span></td><td>경제학부</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>5</td><td><strong>김무진</strong></td><td>27</td><td>4년제 졸업</td><td><span class="tag tag-other">강릉원주대</span></td><td>조형예술·디자인학과</td><td>04/17</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>6</td><td><strong>김민지</strong></td><td>24</td><td>4년제 졸업</td><td><span class="tag tag-other">인천대</span></td><td>중어중국학과</td><td>04/14</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>7</td><td><strong>김보아</strong></td><td>25</td><td>4년제 졸업</td><td><span class="tag tag-other">한양여대</span></td><td>소프트웨어융합과</td><td>04/11</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>8</td><td><strong>김솔</strong></td><td>21</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>커뮤니케이션디자인학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>9</td><td><strong>김여민</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>국어국문학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>10</td><td><strong>김재원</strong></td><td>32</td><td>4년제 졸업</td><td><span class="tag tag-other">서울과학기술대</span></td><td>경영학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>11</td><td><strong>김지영</strong></td><td>24</td><td>4년제 졸업</td><td><span class="tag tag-other">백석대</span></td><td>디자인영상학부</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>12</td><td><strong>김현석</strong></td><td>25</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>식량자원과학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>13</td><td><strong>김혜은</strong></td><td>19</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>컴퓨터공학부</td><td>04/17</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>14</td><td><strong>문서인</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>컴퓨터공학부</td><td>04/15</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>15</td><td><strong>박수진</strong></td><td>24</td><td>4년제 재학</td><td><span class="tag tag-other">연세대(미래)</span></td><td>데이터사이언스학전공</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>16</td><td><strong>박정민</strong></td><td>25</td><td>4년제 재학</td><td><span class="tag tag-other">중앙대</span></td><td>예술공학부</td><td>04/18</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>17</td><td><strong>백서영</strong></td><td>24</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>의생명공학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>18</td><td><strong>서도은</strong></td><td>26</td><td>4년제 재학</td><td><span class="tag tag-other">군산대</span></td><td>산업디자인학부</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>19</td><td><strong>성하현</strong></td><td>33</td><td>4년제 졸업</td><td><span class="tag tag-other">한동대</span></td><td>콘텐츠융합디자인학부</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>20</td><td><strong>소지섭</strong></td><td>28</td><td>4년제 졸업</td><td><span class="tag tag-other">가천대</span></td><td>응용통계학과</td><td>04/14</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>21</td><td><strong>양지혜</strong></td><td>26</td><td>4년제 졸업</td><td><span class="tag tag-other">안양대</span></td><td>디지털미디어디자인전공</td><td>04/09</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>22</td><td><strong>오성현</strong></td><td>25</td><td>고등학교 졸업</td><td><span class="tag tag-other">영동일고</span></td><td>-</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>23</td><td><strong>오예진</strong></td><td>26</td><td>4년제 졸업예정</td><td><span class="tag tag-other">고려대</span></td><td>산업경영공학부</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>24</td><td><strong>오찬영</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>컴퓨터공학부</td><td>04/15</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>25</td><td><strong>이도균</strong></td><td>26</td><td>4년제 졸업</td><td><span class="tag tag-other">가천대</span></td><td>경영학과</td><td>04/12</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>26</td><td><strong>이상은</strong></td><td>24</td><td>4년제 재학</td><td><span class="tag tag-other">세종대</span></td><td>국어국문학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>27</td><td><strong>이서은</strong></td><td>22</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>커뮤니케이션디자인학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>28</td><td><strong>이재근</strong></td><td>27</td><td>4년제 졸업예정</td><td><span class="tag tag-other">경북대</span></td><td>식품자원경제학과</td><td>04/15</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>29</td><td><strong>이재준</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>화학공학부</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>30</td><td><strong>이현승</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>스마트ICT융합공학과</td><td>04/12</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>31</td><td><strong>임소정</strong></td><td>25</td><td>4년제 졸업</td><td><span class="tag tag-other">동덕여대</span></td><td>정보학부 컴퓨터학전공</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>32</td><td><strong>장원용</strong></td><td>25</td><td>2/3년제 재학</td><td><span class="tag tag-other">울산과학대</span></td><td>컴퓨터공학과</td><td>04/10</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>33</td><td><strong>전민서</strong></td><td>27</td><td>2/3년제 재학</td><td><span class="tag tag-other">울산과학대</span></td><td>컴퓨터IT·보안학과</td><td>04/10</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>34</td><td><strong>전윤정</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>산업공학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>35</td><td><strong>정세연</strong></td><td>21</td><td>4년제 재학</td><td><span class="tag tag-other">중앙대</span></td><td>도시계획부동산학과</td><td>04/07</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>36</td><td><strong>지윤상</strong></td><td>26</td><td>4년제 졸업예정</td><td><span class="tag tag-ku">건국대</span></td><td>국제무역학과</td><td>04/16</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>37</td><td><strong>최강희</strong></td><td>27</td><td>4년제 졸업</td><td><span class="tag tag-other">동국대</span></td><td>컴퓨터공학과</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>38</td><td><strong>최다희</strong></td><td>27</td><td>4년제 졸업</td><td><span class="tag tag-other">고려대(세종)</span></td><td>고고미술사학전공</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>39</td><td><strong>최시우</strong></td><td>24</td><td>4년제 졸업</td><td><span class="tag tag-other">연세대</span></td><td>전기전자공학부</td><td>04/19</td><td><span class="tag tag-web">Web</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>40</td><td><strong>이효림</strong></td><td>21</td><td>4년제 재학(3학년)</td><td><span class="tag tag-ku">건국대</span></td><td>-</td><td colspan="2" style="color:var(--gray-3)"><span class="tag tag-google">구글폼</span></td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>41</td><td><strong>지은서</strong></td><td>24</td><td>4년제 재학(4학년)</td><td><span class="tag tag-ku">건국대</span></td><td>-</td><td colspan="2" style="color:var(--gray-3)"><span class="tag tag-google">구글폼</span></td><td>-</td><td>-</td><td>-</td></tr>
+
+          <tr class="divider-row"><td colspan="11">— AI 기반 보험상품 정보 콘텐츠 확산 전략 프로젝트 (26명) —</td></tr>
+          <tr><td>42</td><td><strong>고동민</strong></td><td>25</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>행정학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>43</td><td><strong>권미정</strong></td><td>22</td><td>4년제 재학</td><td><span class="tag tag-other">동국대</span></td><td>수학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>44</td><td><strong>김가현</strong></td><td>21</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>경제학과</td><td>04/12</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>45</td><td><strong>김도연</strong></td><td>21</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>기술경영학과</td><td>04/17</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>46</td><td><strong>김민아</strong></td><td>27</td><td>4년제 수료</td><td><span class="tag tag-other">중앙대</span></td><td>경영학부</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>47</td><td><strong>김연우</strong></td><td>24</td><td>4년제 휴학</td><td><span class="tag tag-ku">건국대</span></td><td>국어국문학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>48</td><td><strong>김정인</strong></td><td>21</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>경영학과</td><td>04/12</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>49</td><td><strong>김하늘</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>미디어커뮤니케이션학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>50</td><td><strong>나예은</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-other">신한대</span></td><td>글로벌관광경영학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>51</td><td><strong>박수연</strong></td><td>23</td><td>4년제 휴학</td><td><span class="tag tag-other">동국대</span></td><td>수학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>52</td><td><strong>박수현</strong></td><td>26</td><td>4년제 졸업예정</td><td><span class="tag tag-other">연세대</span></td><td>응용통계학과</td><td>04/07</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>53</td><td><strong>박지원</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-other">동국대</span></td><td>수학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y⚠</span></td></tr>
+          <tr><td>54</td><td><strong>배승언</strong></td><td>27</td><td>석사 졸업</td><td><span class="tag tag-other">한양대</span></td><td>경영공학전공</td><td>04/18</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>55</td><td><strong>윤채영</strong></td><td>22</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>영어교육과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>56</td><td><strong>윤현경</strong></td><td>24</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>국어국문학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>57</td><td><strong>이성재</strong></td><td>21</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>사회환경공학부</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-y">Y</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>58</td><td><strong>이승준</strong></td><td>22</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>기술경영학과</td><td>04/17</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>59</td><td><strong>임채민</strong></td><td>20</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>사회환경공학부</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>60</td><td><strong>장명건</strong></td><td>26</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>경영학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>61</td><td><strong>장이린</strong></td><td>20</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>미디어커뮤니케이션학과</td><td>04/18</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>62</td><td><strong>조해령</strong></td><td>24</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>기술경영학과</td><td>04/17</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>63</td><td><strong>최유나</strong></td><td>23</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>기술경영학과</td><td>04/13</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>64</td><td><strong>최지훈</strong></td><td>22</td><td>4년제 재학</td><td><span class="tag tag-ku">건국대</span></td><td>부동산학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>65</td><td><strong>홍해원</strong></td><td>24</td><td>4년제 졸업예정</td><td><span class="tag tag-other">서울시립대</span></td><td>경영학부</td><td>04/05</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>66</td><td><strong>황영준</strong></td><td>25</td><td>4년제 재학</td><td><span class="tag tag-other">신한대</span></td><td>글로벌관광경영학과</td><td>04/19</td><td><span class="tag tag-ai">AI</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td><td><span class="tag tag-n">N</span></td></tr>
+          <tr><td>67</td><td><strong>박대산</strong></td><td>34</td><td>4년제 재학(4학년)</td><td><span class="tag tag-ku">건국대</span></td><td>-</td><td colspan="2"><span class="tag tag-google">구글폼</span></td><td>-</td><td>-</td><td>-</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-box" style="margin:12px 22px 16px;">
+      <p>📌 <span class="tag tag-google" style="font-size:10px">구글폼</span> 표시 3명(박대산·이효림·지은서)은 포털 외 구글폼으로 접수 — 학과·이수구분 등 일부 정보 미등록 상태. 포털 등록 여부 별도 확인 필요.</p>
+    </div>
+  </div>
+
+</div><!-- /.main-container -->
+
+<div class="report-footer">
+  건국대학교 산학협력단 · KU Young Makers · 2026 청년일경험지원사업 · 2026.04.20 기준 · 내부 행정용 자료
+</div>
+
+</body>
+</html>
