@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>롯데월드 시즌 마케팅 인텔리전스 | 관광 데이터랩 실데이터 반영</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --magenta:#E6007E;--magenta-dk:#B80064;--pink:#FF5BAA;--red:#ED1C24;
+  --purple:#7B2D8E;--violet:#5B2A86;--gold:#FFB81C;--sky:#00A0E9;--mint:#16C79A;
+  --ink:#1A1226;--ink-2:#3a2f4d;--sub:#7a6f8a;--line:#ECE6F2;--bg:#F6F2FA;--card:#FFFFFF;
+  --shadow:0 18px 50px -18px rgba(123,45,142,.28);--shadow-sm:0 8px 24px -12px rgba(123,45,142,.22);
+  --grad:linear-gradient(120deg,#E6007E 0%,#B80064 45%,#7B2D8E 100%);
+  --grad-2:linear-gradient(120deg,#FF5BAA 0%,#E6007E 60%,#7B2D8E 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.78);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:62px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:16px;letter-spacing:-.4px}
+.brand .dot{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#fff;font-family:'Black Han Sans';font-size:16px;box-shadow:0 6px 16px -6px var(--magenta)}
+.nav-links{display:flex;gap:6px}
+.nav-links a{font-size:13.5px;font-weight:600;color:var(--sub);text-decoration:none;padding:8px 14px;border-radius:100px;transition:.18s}
+.nav-links a:hover{color:var(--magenta);background:rgba(230,0,126,.07)}
+@media(max-width:820px){.nav-links{display:none}}
+.hero{position:relative;background:radial-gradient(120% 130% at 80% -10%,#7B2D8E 0%,#B80064 38%,#E6007E 72%,#FF5BAA 100%);color:#fff;overflow:hidden;padding:70px 0 84px}
+.hero::before{content:'';position:absolute;top:-120px;right:-80px;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(255,184,28,.32) 0%,transparent 66%)}
+.hero::after{content:'';position:absolute;bottom:-160px;left:-60px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(0,160,233,.28) 0%,transparent 68%)}
+.hero .wrap{position:relative;z-index:2}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(8px);font-size:12px;font-weight:700;letter-spacing:1.2px;padding:7px 15px;border-radius:100px}
+.badge .pulse{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,184,28,.6)}70%{box-shadow:0 0 0 9px rgba(255,184,28,0)}100%{box-shadow:0 0 0 0 rgba(255,184,28,0)}}
+.hero h1{font-family:'Black Han Sans';font-size:clamp(30px,5.4vw,54px);line-height:1.1;margin:20px 0 14px;letter-spacing:-1px;text-shadow:0 6px 30px rgba(60,0,40,.25)}
+.hero h1 .hl{color:var(--gold)}
+.hero p.lead{font-size:clamp(14.5px,1.9vw,18px);max-width:670px;color:rgba(255,255,255,.92)}
+.hero .src{margin-top:24px;display:flex;flex-wrap:wrap;gap:9px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px}
+.hero-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:38px}
+.hk{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:18px 16px;backdrop-filter:blur(10px)}
+.hk .v{font-family:'Black Han Sans';font-size:27px;line-height:1;color:#fff}
+.hk .v small{font-size:14px;font-family:'Noto Sans KR';font-weight:700}
+.hk .l{font-size:12px;color:rgba(255,255,255,.82);margin-top:8px;font-weight:500}
+.hk .d{font-size:11px;margin-top:5px;font-weight:700;color:var(--gold)}
+@media(max-width:820px){.hero-kpis{grid-template-columns:repeat(2,1fr)}}
+section{padding:60px 0}
+.sec-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px}
+.sec-num{flex:none;width:46px;height:46px;border-radius:14px;background:var(--grad);color:#fff;display:grid;place-items:center;font-family:'Black Han Sans';font-size:22px;box-shadow:var(--shadow-sm)}
+.sec-head h2{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.8px;line-height:1.2}
+.sec-head .kk{font-size:12px;font-weight:800;letter-spacing:2px;color:var(--magenta);text-transform:uppercase}
+.sec-head p{color:var(--sub);font-size:14px;margin-top:5px;max-width:740px}
+.map-grid{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.map-row{display:grid;grid-template-columns:1.15fr 56px 1.5fr;align-items:center;gap:18px;padding:17px 22px;border-bottom:1px solid var(--line);transition:.2s}
+.map-row:last-child{border-bottom:none}
+.map-row:hover{background:#FCF6FA}
+.map-row.head{background:var(--ink);color:#fff;font-weight:700;font-size:13px}
+.map-row.head .arrow{color:rgba(255,255,255,.5)}
+.mr-src{font-weight:600;font-size:14px}
+.mr-src .tag{display:inline-block;font-size:11px;font-weight:700;color:var(--sky);background:rgba(0,160,233,.1);padding:2px 8px;border-radius:6px;margin-bottom:5px}
+.arrow{font-size:21px;color:var(--magenta);text-align:center;font-weight:800}
+.mr-dst{font-size:13.5px;color:var(--ink-2)}
+.mr-dst b{color:var(--magenta-dk)}
+@media(max-width:680px){.map-row{grid-template-columns:1fr;gap:6px}.arrow{text-align:left}.map-row.head{display:none}}
+.uploader{background:linear-gradient(135deg,#fff,#FCF5FA);border:2px dashed var(--pink);border-radius:20px;padding:24px;margin-bottom:26px;transition:.2s;text-align:center}
+.uploader.drag{background:#FCEAF4;border-color:var(--magenta);transform:scale(1.005)}
+.uploader h3{font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px}
+.uploader p{font-size:13px;color:var(--sub);margin:6px 0 14px}
+.up-btn{display:inline-flex;align-items:center;gap:8px;background:var(--grad);color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:700;padding:11px 22px;border-radius:100px;cursor:pointer;box-shadow:var(--shadow-sm)}
+.up-log{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.up-log span{font-size:11.5px;font-weight:700;background:#fff;border:1px solid var(--line);padding:5px 11px;border-radius:100px;color:var(--mint)}
+.up-log span.err{color:var(--red)}
+.bento{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.cardx{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 22px 18px;box-shadow:var(--shadow-sm);position:relative}
+.cardx.span2{grid-column:span 2}
+.cardx h3{font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:9px}
+.cardx h3 .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;color:#fff}
+.cardx h3 .live{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--mint);background:rgba(22,199,154,.12);padding:3px 9px;border-radius:100px}
+.cardx .sub{font-size:12.5px;color:var(--sub);margin:4px 0 14px}
+.cv{position:relative;height:300px}
+.cv.tall{height:330px}
+.insight{margin-top:14px;font-size:12.5px;background:#FCF4F9;border-left:3px solid var(--magenta);padding:10px 13px;border-radius:0 10px 10px 0;color:var(--ink-2)}
+.insight b{color:var(--magenta-dk)}
+@media(max-width:820px){.bento{grid-template-columns:1fr}.cardx.span2{grid-column:span 1}.cv{height:260px}}
+.sim{background:linear-gradient(135deg,#1A1226 0%,#3a1233 55%,#5B2A86 120%);border-radius:28px;overflow:hidden;box-shadow:var(--shadow);color:#fff}
+.sim-grid{display:grid;grid-template-columns:1fr 1.25fr}
+.sim-in{padding:32px 30px;border-right:1px solid rgba(255,255,255,.1)}
+.sim-out{padding:32px 30px;background:rgba(0,0,0,.16)}
+.sim h3{font-size:13px;font-weight:800;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:20px}
+.field{margin-bottom:22px}
+.field>label{display:block;font-size:13.5px;font-weight:700;margin-bottom:10px;color:rgba(255,255,255,.92)}
+.opt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.opt-grid.c4{grid-template-columns:repeat(4,1fr)}
+.opt-grid.c2{grid-template-columns:repeat(2,1fr)}
+.opt{border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);border-radius:12px;padding:9px 6px;text-align:center;cursor:pointer;transition:.16s}
+.opt:hover{border-color:rgba(255,255,255,.45)}
+.opt.on{background:var(--grad-2);border-color:transparent;box-shadow:0 8px 22px -10px var(--magenta)}
+.opt .t{font-size:12.5px;font-weight:800}
+.opt .c{font-size:10.5px;color:rgba(255,255,255,.62);margin-top:2px}
+.opt.on .c{color:rgba(255,255,255,.9)}
+.rng-wrap{display:flex;align-items:center;gap:14px}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:7px;border-radius:100px;background:rgba(255,255,255,.18);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:5px solid var(--gold);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.rng-val{flex:none;font-family:'Black Han Sans';font-size:23px;min-width:96px;text-align:right;color:var(--gold)}
+.rng-val small{font-family:'Noto Sans KR';font-size:13px;font-weight:700;color:#fff}
+.season-pill{display:inline-block;margin-top:9px;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:100px}
+.season-pill.low{background:rgba(22,199,154,.22);color:#7DF5CE}
+.season-pill.mid{background:rgba(255,184,28,.22);color:var(--gold)}
+.season-pill.high{background:rgba(237,28,36,.24);color:#FF9aa0}
+.out-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-bottom:20px}
+.ok{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:16px;padding:16px}
+.ok .l{font-size:12px;color:rgba(255,255,255,.7);font-weight:600}
+.ok .v{font-family:'Black Han Sans';font-size:28px;line-height:1.1;margin-top:6px}
+.ok .v small{font-size:14px;font-family:'Noto Sans KR';font-weight:700}
+.ok.hero-roi{grid-column:span 2;background:var(--grad-2);border:none}
+.ok.hero-roi .v{font-size:44px}
+.ok.hero-roi .ref{font-size:12px;font-weight:700;color:rgba(255,255,255,.92);margin-top:4px}
+.formula{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px 17px;font-size:13px}
+.formula .ft{font-size:11.5px;font-weight:800;letter-spacing:1px;color:var(--gold);margin-bottom:10px}
+.formula code{display:block;font-family:'Courier New',monospace;background:rgba(255,255,255,.06);padding:9px 12px;border-radius:8px;font-size:12px;color:#fff;line-height:1.7;word-break:break-word}
+.formula .calc{margin-top:10px;font-size:12px;color:rgba(255,255,255,.82);line-height:1.9}
+.formula .calc b{color:var(--gold)}
+@media(max-width:820px){.sim-grid{grid-template-columns:1fr}.sim-in{border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}}
+.disclaimer{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin-top:28px}
+.disclaimer h4{font-size:13.5px;font-weight:800;margin-bottom:8px}
+.disclaimer ul{list-style:none;font-size:12.5px;color:var(--sub);line-height:1.9}
+.disclaimer li{padding-left:18px;position:relative}
+.disclaimer li::before{content:'•';position:absolute;left:4px;color:var(--magenta)}
+footer{background:var(--ink);color:rgba(255,255,255,.6);padding:32px 0;font-size:12.5px;text-align:center}
+footer b{color:#fff}
+.fade{opacity:0;transform:translateY(22px);transition:.7s cubic-bezier(.2,.7,.3,1)}
+.fade.in{opacity:1;transform:none}
+/* venue toggle */
+.venuebar{position:sticky;top:62px;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.venuebar .wrap{display:flex;align-items:center;gap:14px;min-height:54px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.venuebar .lab{font-size:12.5px;font-weight:800;color:var(--sub)}
+.vseg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:100px;padding:4px}
+.vseg button{border:none;background:none;font-family:inherit;font-size:13px;font-weight:700;color:var(--sub);padding:7px 16px;border-radius:100px;cursor:pointer;transition:.16s}
+.vseg button.on[data-v=all]{background:linear-gradient(120deg,#7B2D8E,#5B2A86);color:#fff}
+.vseg button.on[data-v=seoul]{background:var(--magenta);color:#fff}
+.vseg button.on[data-v=busan]{background:var(--sky);color:#fff}
+.venuebar .vnote{font-size:11.5px;color:var(--sub);margin-left:auto}
+.venuebar .vnote b{color:var(--magenta-dk)}
+/* scorecard */
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.score{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow-sm)}
+.score .l{font-size:12px;color:var(--sub);font-weight:600;min-height:30px}
+.score .row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:6px}
+.score .v{font-family:'Black Han Sans';font-size:25px;line-height:1}
+.score .dl{font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap}
+.score .dl.up{color:#0a8f6e;background:rgba(22,199,154,.13)}
+.score .dl.down{color:#c0392b;background:rgba(237,28,36,.1)}
+.score svg.spark{margin-top:10px;display:block}
+@media(max-width:820px){.score-grid{grid-template-columns:repeat(2,1fr)}}
+/* heatmap */
+.heatwrap{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow-sm);margin-bottom:22px;overflow-x:auto}
+.heat{display:grid;grid-template-columns:74px repeat(12,1fr);gap:5px;min-width:680px}
+.heat .hc{font-size:11px;font-weight:700;color:var(--sub);display:flex;align-items:center;justify-content:center;height:28px}
+.heat .rl{font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px}
+.heat .cell{height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#fff;cursor:pointer;transition:.14s;border:2px solid transparent}
+.heat .cell:hover{transform:scale(1.09)}
+.heat .cell.sel{border-color:var(--ink)}
+.heatleg{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--sub);margin-top:12px}
+.heatleg .bar{flex:1;height:8px;border-radius:100px;background:linear-gradient(90deg,#16C79A,#FFB81C,#ED1C24);max-width:220px}
+/* action cards */
+.act-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.act{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+.act .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.act .mo{font-family:'Black Han Sans';font-size:18px}
+.act .sc{font-size:11px;font-weight:800;color:#fff;background:var(--magenta);padding:3px 10px;border-radius:100px}
+.act .sig{font-size:12px;color:var(--sub);margin-bottom:8px}
+.act .sig b{color:var(--ink)}
+.act .do{font-size:13.5px;font-weight:700;margin-bottom:8px}
+.act .eff{font-size:12px;background:#FCF4F9;border-radius:8px;padding:8px 10px;color:var(--ink-2)}
+.act .eff b{color:var(--magenta-dk)}
+@media(max-width:820px){.act-grid{grid-template-columns:1fr}}
+/* forecast */
+.fc-badge{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:var(--mint);background:rgba(22,199,154,.12);padding:5px 11px;border-radius:100px;margin-left:auto}
+.fc-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
+.fc-table th,.fc-table td{padding:7px 6px;text-align:center;border-bottom:1px solid var(--line)}
+.fc-table th{color:var(--sub);font-weight:700;font-size:11px}
+.fc-table td b{color:var(--magenta-dk)}
+/* sim ranges */
+.range-row{display:flex;gap:10px;margin-bottom:14px}
+.range-row .rb{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:13px;padding:11px;text-align:center}
+.range-row .rb .l{font-size:10.5px;color:rgba(255,255,255,.6);font-weight:700}
+.range-row .rb .v{font-family:'Black Han Sans';font-size:18px;margin-top:4px}
+.range-row .rb.base{background:rgba(255,184,28,.12);border-color:rgba(255,184,28,.4)}
+.range-row .rb.base .v{color:var(--gold)}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap nav-inner">
+  <div class="brand"><span class="dot">L</span> 롯데월드 마케팅 인텔리전스</div>
+  <div class="nav-links">
+    <a href="#board">인사이트</a><a href="#analysis">데이터 분석</a><a href="#forecast">예측</a><a href="#sim">시뮬레이터</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="badge"><span class="pulse"></span> 한국관광 데이터랩 실데이터 반영 · 2025.05–2026.04</span>
+  <h1>관광 빅데이터로<br><span class="hl">시즌 마케팅</span>을 설계하다</h1>
+  <p class="lead">강진군 데이터 기반 관광정책 모범사례의 <b>‘데이터 → 전략 → 경제효과’</b> 프레임에, 한국관광 데이터랩의 <b>실제 CSV 5종</b>(K-Culture 글로벌 언급량·키워드·전국 관광 카드소비)을 반영했습니다. 시기별 수요·소비 시즌성을 진단하고 ROI를 예측합니다.</p>
+  <div class="src">
+    <span class="chip">📊 K-Culture 글로벌 언급량</span>
+    <span class="chip">🔑 관광 키워드 TOP10</span>
+    <span class="chip">💳 전국 관광 카드소비 24업종</span>
+    <span class="chip">🎡 관광유원시설 소비</span>
+  </div>
+  <div class="hero-kpis">
+    <div class="hk"><div class="v">14.1<small>만</small></div><div class="l">글로벌 K-Culture 월 언급량 피크</div><div class="d">2025.06 · 12월 比 2.5배</div></div>
+    <div class="hk"><div class="v">78<small>%</small></div><div class="l">‘K-공연관람’ 키워드 점유</div><div class="d">전체 언급량 1위</div></div>
+    <div class="hk"><div class="v">158<small>억</small></div><div class="l">전국 관광 카드소비 월 최대</div><div class="d">2025.10 (가을 성수기)</div></div>
+    <div class="hk"><div class="v">2.5<small>배</small></div><div class="l">관광유원시설 소비 격차</div><div class="d">10월 최대 vs 1월 최저</div></div>
+  </div>
+</div></header>
+
+<!-- VENUE TOGGLE -->
+<div class="venuebar"><div class="wrap">
+  <span class="lab">분석 시설</span>
+  <div class="vseg" id="venueSeg">
+    <button data-v="all" class="on">전국 기준</button>
+    <button data-v="seoul">서울 잠실</button>
+    <button data-v="busan">부산</button>
+  </div>
+  <span class="vnote" id="venueNote"></span>
+</div></div>
+
+<!-- ★ INSIGHT BOARD -->
+<section id="board"><div class="wrap fade">
+  <div class="sec-head">
+    <div class="sec-num" style="background:linear-gradient(120deg,#FFB81C,#E6007E)">★</div>
+    <div><div class="kk">Executive Insight Board</div><h2>인사이트 보드 — <span id="boardVenue">전국 기준</span></h2>
+    <p>데이터에서 자동 산출된 KPI·기회 점수·추천 액션. 상단 시설 토글에 따라 재계산됩니다.</p></div>
+  </div>
+  <div class="score-grid" id="scoreGrid"></div>
+
+  <div class="heatwrap">
+    <h3 style="font-size:15.5px;font-weight:800;margin-bottom:4px">📅 기회 캘린더 — 월별 마케팅 기회 점수</h3>
+    <div style="font-size:12.5px;color:var(--sub);margin-bottom:14px">수요여력·글로벌 관심·예산 탄력을 합성한 0~100 점수. 높을수록(붉을수록) 캠페인 적기. 셀을 누르면 해당 시설 추천 액션이 갱신됩니다.</div>
+    <div class="heat" id="heat"></div>
+    <div class="heatleg"><span>낮음 (성수기·혼잡)</span><div class="bar"></div><span>높음 (비수기·기회)</span></div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:800;margin:24px 0 14px">🎯 추천 액션 Top — <span id="actVenue">서울 잠실</span></h3>
+  <div class="act-grid" id="actGrid"></div>
+</div></section>
+
+<!-- ① METHOD -->
+<section id="method"><div class="wrap fade">
+  <div class="sec-head"><div class="sec-num">1</div>
+    <div><div class="kk">Methodology Mapping</div><h2>데이터랩 실데이터 → 롯데월드 마케팅 의사결정</h2>
+    <p>업로드된 데이터랩 CSV 5종을 롯데월드의 ‘언제·누구에게·무엇으로·얼마나’ 의사결정에 1:1로 연결했습니다.</p></div>
+  </div>
+  <div class="map-grid">
+    <div class="map-row head"><div>데이터랩 실데이터 (업로드)</div><div class="arrow">→</div><div>롯데월드 마케팅 의사결정</div></div>
+    <div class="map-row"><div class="mr-src"><span class="tag">언급량(월별)</span><br>K-Culture 글로벌 소셜 언급량</div><div class="arrow">→</div><div class="mr-dst"><b>‘언제’ — 글로벌 관심 시즌성</b> 진단 → 인바운드 캠페인 시기 선정</div></div>
+    <div class="map-row"><div class="mr-src"><span class="tag">키워드 TOP10</span><br>K-공연·덕질·팝업스토어 등</div><div class="arrow">→</div><div class="mr-dst"><b>‘무엇으로’ — 연계 테마</b> 발굴 → 공연·팝업·굿즈 콜라보 기획</div></div>
+    <div class="map-row"><div class="mr-src"><span class="tag">관광 카드소비</span><br>전국 24개 업종 지출액</div><div class="arrow">→</div><div class="mr-dst"><b>‘얼마나’ — 소비 구성·규모</b> 분석 → 패키지 객단가 설계 + 경제효과 산출</div></div>
+    <div class="map-row"><div class="mr-src"><span class="tag">관광유원시설</span><br>테마파크 업종 카드소비</div><div class="arrow">→</div><div class="mr-dst"><b>‘비수기 공략’ — 동종업종 시즌성</b> → 시뮬레이터 시기계수의 실측 근거</div></div>
+  </div>
+</div></section>
+
+<!-- ② ANALYSIS -->
+<section id="analysis" style="background:linear-gradient(180deg,#fff,#F6F2FA)"><div class="wrap fade">
+  <div class="sec-head"><div class="sec-num">2</div>
+    <div><div class="kk">Data Analytics · Live</div><h2>실데이터 분석 — 데이터랩 2025.05~2026.04</h2>
+    <p>아래 차트는 업로드된 실제 CSV로 그려졌습니다. 새 데이터랩 CSV를 끌어다 놓으면 해당 차트가 자동 갱신됩니다.</p></div>
+  </div>
+
+  <div class="uploader" id="dropzone">
+    <h3>📥 데이터랩 CSV 업로드</h3>
+    <p>K-언급량 · 키워드 · 관광지출액 CSV를 드래그하거나 버튼으로 선택하세요. 형식을 자동 인식해 차트에 반영합니다.</p>
+    <button class="up-btn" id="pickBtn">📂 CSV 파일 선택</button>
+    <input type="file" id="fileInput" accept=".csv" multiple hidden>
+    <div class="up-log" id="upLog"></div>
+  </div>
+
+  <div class="bento">
+    <div class="cardx span2">
+      <h3><span class="ic" style="background:var(--magenta)">📈</span>글로벌 K-Culture 월별 언급량 <span class="live">LIVE</span></h3>
+      <div class="sub">‘언제’ — 글로벌 K관광 관심도(소셜 언급량) 시즌성</div>
+      <div class="cv tall"><canvas id="chMention"></canvas></div>
+      <div class="insight" id="insMention"></div>
+    </div>
+
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--purple)">🔑</span>관광 키워드 TOP10 <span class="live">LIVE</span></h3>
+      <div class="sub">‘무엇으로’ — 누적 언급량 상위 관광 테마</div>
+      <div class="cv tall"><canvas id="chKwTop"></canvas></div>
+      <div class="insight" id="insKw"></div>
+    </div>
+
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--sky)">🧭</span>키워드 월별 트렌드 (TOP5) <span class="live">LIVE</span></h3>
+      <div class="sub">테마별 관심 추이 — 콜라보 타이밍</div>
+      <div class="cv tall"><canvas id="chKwTrend"></canvas></div>
+      <div class="insight" id="insTrend"></div>
+    </div>
+
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--gold);color:var(--ink)">💳</span>전국 관광 카드소비 월별 <span class="live">LIVE</span></h3>
+      <div class="sub">‘얼마나’ — 관광총소비 규모 시즌성 (억원)</div>
+      <div class="cv"><canvas id="chSpendTotal"></canvas></div>
+      <div class="insight" id="insSpend"></div>
+    </div>
+
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--mint)">🧩</span>관광 카드소비 구성 <span class="live">LIVE</span></h3>
+      <div class="sub">방문객 지출 구조 (2025.10 기준)</div>
+      <div class="cv"><canvas id="chComp"></canvas></div>
+      <div class="insight" id="insComp"></div>
+    </div>
+
+    <div class="cardx span2">
+      <h3><span class="ic" style="background:var(--red)">🎡</span>관광유원시설(테마파크) 카드소비 시즌성 <span class="live">LIVE</span></h3>
+      <div class="sub">롯데월드 동종업종 — 비수기 마케팅 타이밍의 실측 근거 (백만원)</div>
+      <div class="cv"><canvas id="chPark"></canvas></div>
+      <div class="insight" id="insPark"></div>
+    </div>
+
+    <div class="cardx span2">
+      <h3><span class="ic" style="background:var(--violet)">🏰</span>시설별 수요 지수 비교 <span class="live" style="color:var(--violet);background:rgba(91,42,134,.12)">MODEL</span></h3>
+      <div class="sub">전국 관광유원시설 시즌성 × 시설 프로파일(모델 가정) — 서울(실내·평탄) vs 부산(실외·여름집중)</div>
+      <div class="cv"><canvas id="chDemand"></canvas></div>
+      <div class="insight" id="insDemand"></div>
+    </div>
+  </div>
+
+  <div class="sec-head" style="margin-top:50px">
+    <div class="sec-num" style="background:linear-gradient(120deg,#00A0E9,#5B2A86)">＋</div>
+    <div><div class="kk">National Travel Survey · 2021–2024</div><h2>연도별·연령대별 국민여행 트렌드</h2>
+    <p>국민여행조사 기반 — 월별 데이터랩에 더해 <b>연도별 비교</b>와 <b>연령대별 핵심 타깃</b>을 진단합니다.</p></div>
+  </div>
+  <div class="bento">
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--sky)">📅</span>연도별 국내여행 규모 <span class="live">LIVE</span></h3>
+      <div class="sub">총 여행지출(조원) · 여행 횟수(백만회)</div>
+      <div class="cv"><canvas id="chYearScale"></canvas></div>
+      <div class="insight" id="insYear"></div>
+    </div>
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--gold);color:var(--ink)">💴</span>1인 객단가·경험률 추이 <span class="live">LIVE</span></h3>
+      <div class="sub">1인 평균 여행지출(천원) · 관광 경험률(%)</div>
+      <div class="cv"><canvas id="chYearRate"></canvas></div>
+      <div class="insight" id="insRate"></div>
+    </div>
+    <div class="cardx span2">
+      <h3><span class="ic" style="background:var(--purple)">👥</span>연령대별 여행지출·횟수 (2024) <span class="live">LIVE</span></h3>
+      <div class="sub">‘누가’ — 지출·여행 빈도로 본 핵심 타깃 연령</div>
+      <div class="cv"><canvas id="chAge"></canvas></div>
+      <div class="insight" id="insAge"></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ③ FORECAST -->
+<section id="forecast" style="background:linear-gradient(180deg,#fff,#F6F2FA)"><div class="wrap fade">
+  <div class="sec-head"><div class="sec-num">3</div>
+    <div><div class="kk">Demand Forecast · Validated</div><h2>수요 예측 — <span id="fcVenue">전국 기준</span></h2>
+    <p>계절지수×추세 통계로 향후 6개월을 예측하고, 80% 신뢰구간과 과거 정확도(MAPE)를 함께 제시합니다. CSV를 더 올릴수록 정밀해집니다.</p></div>
+  </div>
+  <div class="bento">
+    <div class="cardx span2">
+      <h3><span class="ic" style="background:var(--magenta)">🔮</span>시설 수요 예측 (향후 6개월)<span class="fc-badge" id="fcMape">정확도 —</span></h3>
+      <div class="sub">실측(실선) + 예측(점선) + 80% 신뢰구간(음영)</div>
+      <div class="cv tall"><canvas id="chForecast"></canvas></div>
+      <table class="fc-table" id="fcTable"></table>
+    </div>
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--sky)">🌐</span>글로벌 K-관심 예측<span class="fc-badge" id="fcMapeM">정확도 —</span></h3>
+      <div class="sub">소셜 언급량 6개월 투영</div>
+      <div class="cv"><canvas id="chForecastM"></canvas></div>
+      <div class="insight" id="insFc"></div>
+    </div>
+    <div class="cardx">
+      <h3><span class="ic" style="background:var(--gold);color:var(--ink)">🧮</span>예측 방법론</h3>
+      <div class="sub">투명·인용 가능</div>
+      <div style="font-size:12.5px;color:var(--ink-2);line-height:2">
+        ① 계절지수 = 월별값 ÷ 평균<br>② 추세 = 탈계절 시계열 선형회귀<br>③ 예측 = 추세 × 계절지수<br>④ 신뢰구간 = 잔차 표준편차 ±1.28σ (80%)<br>⑤ 검증 = 최근값 홀드아웃 MAPE<br><span style="color:var(--sub)">데이터 1주기 기준 참고치 — 장기 자료 업로드 시 정밀화됩니다.</span>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ④ SIMULATOR -->
+<section id="sim"><div class="wrap fade">
+  <div class="sec-head"><div class="sec-num">4</div>
+    <div><div class="kk">Strategy Simulator</div><h2>전략 시뮬레이터 — 시설별 ROI 예측 (Best/Base/Worst)</h2>
+    <p>시기계수는 위 <b>관광유원시설 카드소비 실측 시즌성</b>에서 도출했습니다. 시기·타깃·예산을 조정하면 추가방문객·매출·생산유발·ROI가 실시간 재계산됩니다.</p></div>
+  </div>
+  <div class="sim"><div class="sim-grid">
+    <div class="sim-in">
+      <h3>🎛 전략 입력</h3>
+      <div class="field"><label>① 캠페인 시기 <span style="font-weight:500;color:rgba(255,255,255,.6)">(계수 = 실측 소비 역산)</span></label>
+        <div class="opt-grid c4" id="monthGrid"></div>
+        <div class="season-pill low" id="seasonPill"></div>
+      </div>
+      <div class="field"><label>② 핵심 타깃 세그먼트</label>
+        <div class="opt-grid c2" id="segGrid"></div>
+      </div>
+      <div class="field"><label>③ 마케팅 예산</label>
+        <div class="rng-wrap"><input type="range" id="budget" min="2" max="60" step="1" value="22"><div class="rng-val"><span id="budgetVal">22</span><small>억원</small></div></div>
+      </div>
+    </div>
+    <div class="sim-out">
+      <h3>📊 예측 결과 — <span id="simVenue" style="color:#fff">전국 기준</span></h3>
+      <div class="out-kpis">
+        <div class="ok hero-roi"><div class="l">투자수익률 (생산유발효과 ÷ 마케팅예산)</div><div class="v"><span id="oRoi">12.7</span>배</div><div class="ref" id="roiRef"></div></div>
+        <div class="ok"><div class="l">추가 방문객 (Base)</div><div class="v"><span id="oVisitor">24.7</span><small>만명</small></div></div>
+        <div class="ok"><div class="l">직접 매출 (Base)</div><div class="v"><span id="oRevenue">133</span><small>억원</small></div></div>
+      </div>
+      <div class="range-row">
+        <div class="rb"><div class="l">Worst · 전환 0.4</div><div class="v"><span id="oWorst">—</span></div></div>
+        <div class="rb base"><div class="l">Base · 전환 0.5</div><div class="v"><span id="oBase">—</span></div></div>
+        <div class="rb"><div class="l">Best · 전환 0.6</div><div class="v"><span id="oBest">—</span></div></div>
+      </div>
+      <div class="ok" style="grid-column:span 2;margin-bottom:18px"><div class="l">생산유발효과 (승수 2.1배) <span id="oCap" style="font-size:11px;color:rgba(255,255,255,.6)"></span></div><div class="v" style="color:var(--gold)"><span id="oEffect">280</span><small>억원</small></div></div>
+      <div class="formula">
+        <div class="ft">투명한 산식 (강의·보고서 인용 가능)</div>
+        <code>추가방문객 = 예산 × 시기계수 × 세그먼트 × 전환 × 기준유입(1.5만명/억) → 시설 용량 상한 적용</code>
+        <div class="calc" id="calcSteps"></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="disclaimer">
+    <h4>⚠️ 데이터 및 산식 안내</h4>
+    <ul>
+      <li><b>분석 차트(②)는 한국관광 데이터랩·국민여행조사 실제 CSV</b>(월별 2025.05~2026.04 / 연도별 2021~2024)로 그려졌습니다. ‘CSV 업로드’로 최신 자료를 올리면 자동 갱신됩니다.</li>
+      <li>시기계수는 <b>관광유원시설 업종 카드소비의 월별 실측치를 역산</b>(평균÷해당월, 0.9~1.3 범위)해 도출 — 소비가 낮은 비수기일수록 마케팅 탄력성↑.</li>
+      <li><b>서울·부산 수요는 모델 가정 프로파일</b>(서울=실내·연중·외국인↑ / 부산=실외·여름집중·영남권, 연 방문 760만·260만, 월 용량 95만·34만)을 전국 시즌성에 적용한 결과이며 시설 실측이 아닙니다. 지역별 데이터랩 CSV 확보 시 실측으로 교체됩니다.</li>
+      <li><b>예측은 계절지수×추세 통계 투영 + 80% 신뢰구간</b>이며, 정확도(MAPE)는 데이터 1주기(12개월)·연 4포인트 기준 <b>참고치</b>입니다. 장기·지역 자료를 올릴수록 정밀화됩니다.</li>
+      <li>롯데월드 방문객수·객단가(5.4만원)·생산유발승수(2.1)는 강진군 모범사례 프레임의 가정값입니다. ROI = 생산유발효과 ÷ 마케팅예산.</li>
+      <li>업로드 CSV는 브라우저 내에서만 처리되며 서버로 전송되지 않습니다.</li>
+    </ul>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <b>롯데월드 시즌 마케팅 인텔리전스</b> · 한국관광 데이터랩 실데이터(2025.05–2026.04) 반영<br>
+  데이터 기반 관광정책 모범사례(강진군) 방법론 적용 · 방문객/경제효과 계수는 시연용 가정값
+</div></footer>
+
+<script>
+/* ===== 기본(베이크된 실데이터) ===== */
+const fmtYM=ym=>String(ym).slice(2,4)+'.'+String(ym).slice(4,6);
+const D={
+  ymList:[202505,202506,202507,202508,202509,202510,202511,202512,202601,202602,202603,202604],
+  mention:[135962,141143,97035,94701,125871,84465,69322,56981,75441,57417,86282,70315],
+  kwTop:{labels:['K-공연관람','K-덕질','K-드라마/영화','K-댄스 배우기','엔터 방문(HYBE·SM·JYP)','K-Culture 거리','촬영지','K-예능 대상지','K-굿즈','K-팝업 스토어'],
+         vals:[800281,122928,74235,45860,30320,7427,5429,3477,2813,2165]},
+  kwTrend:{
+    'K-공연관람':[108400,114556,74666,68639,97694,61760,47946,35748,46568,38635,65635,40034],
+    'K-덕질':[11453,10580,9476,9357,12356,8341,7712,8227,14883,7736,9360,13447],
+    'K-드라마/영화':[6714,5639,6192,8308,7107,7084,5779,6161,5107,6159,5116,4869],
+    'K-댄스 배우기':[2475,2859,4032,5314,5906,2366,2536,4549,5231,2596,2424,5572],
+    '엔터 방문':[5390,5705,1004,1082,986,3033,2277,886,2112,897,2023,4925]},
+  spendTotal:[156.6,139.7,149.0,152.3,142.4,158.2,154.1,157.8,150.5,142.3,156.1,151.5],
+  park:[58.1,41.7,46.8,59.7,39.9,69.1,43.4,32.4,28.0,34.4,38.8,49.4],
+  comp:{labels:['쇼핑','외식','교통','레저·관광','숙박','여행업'],vals:[6094,4633,3269,776,478,269]}
+};
+Chart.defaults.font.family="'Noto Sans KR',sans-serif";
+Chart.defaults.color="#7a6f8a";
+const PAL=['#E6007E','#FF5BAA','#7B2D8E','#00A0E9','#16C79A','#FFB81C','#ED1C24','#B0A8BE','#C9A3D6','#5B2A86'];
+const labelsOf=()=>D.ymList.map(fmtYM);
+const peakIdx=a=>a.indexOf(Math.max(...a)), lowIdx=a=>a.indexOf(Math.min(...a));
+const charts={};
+
+function renderMention(){
+  const L=labelsOf();
+  if(charts.m){charts.m.data.labels=L;charts.m.data.datasets[0].data=D.mention;charts.m.update();}
+  else charts.m=new Chart(chMention,{type:'line',data:{labels:L,datasets:[{label:'글로벌 언급량',data:D.mention,borderColor:'#E6007E',backgroundColor:'rgba(230,0,126,.12)',borderWidth:3,tension:.4,fill:true,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#E6007E'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.y.toLocaleString()+' 건'}}},scales:{y:{grid:{color:'#F0EAF5'},ticks:{callback:v=>(v/1000)+'k'}},x:{grid:{display:false}}}}});
+  const p=peakIdx(D.mention),l=lowIdx(D.mention);
+  insMention.innerHTML=`<b>인사이트:</b> ${labelsOf()[p]} 피크 ${D.mention[p].toLocaleString()}건 vs ${labelsOf()[l]} 저점 ${D.mention[l].toLocaleString()}건(<b>${(D.mention[p]/D.mention[l]).toFixed(1)}배</b>). 글로벌 관심 급증기에 맞춘 <b>인바운드 캠페인</b>이 효율적입니다.`;
+}
+function renderKwTop(){
+  const L=D.kwTop.labels,V=D.kwTop.vals;
+  if(charts.k){charts.k.data.labels=L;charts.k.data.datasets[0].data=V;charts.k.update();}
+  else charts.k=new Chart(chKwTop,{type:'bar',data:{labels:L,datasets:[{data:V,backgroundColor:L.map((_,i)=>i===0?'#E6007E':'#C9A3D6'),borderRadius:6,barThickness:15}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.x.toLocaleString()+' 건'}}},scales:{x:{grid:{color:'#F0EAF5'},ticks:{callback:v=>(v/1000)+'k'}},y:{grid:{display:false},ticks:{font:{size:11,weight:'600'}}}}}});
+  const tot=V.reduce((a,b)=>a+b,0),share=(V[0]/tot*100).toFixed(0);
+  insKw.innerHTML=`<b>인사이트:</b> <b>${L[0]}</b>가 전체의 <b>${share}%</b> 점유. 롯데월드 <b>K-팝 공연·콘서트 연계 패키지</b>가 최우선 콜라보 후보입니다.`;
+}
+function renderKwTrend(){
+  const L=labelsOf(),keys=Object.keys(D.kwTrend);
+  const ds=keys.map((k,i)=>({label:k,data:D.kwTrend[k],borderColor:PAL[i],backgroundColor:'transparent',borderWidth:2.5,tension:.4,pointRadius:2,pointHoverRadius:5}));
+  if(charts.t){charts.t.data.labels=L;charts.t.data.datasets=ds;charts.t.update();}
+  else charts.t=new Chart(chKwTrend,{type:'line',data:{labels:L,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:7,padding:9,font:{size:10.5,weight:'600'}}}},scales:{y:{grid:{color:'#F0EAF5'},ticks:{callback:v=>(v/1000)+'k'}},x:{grid:{display:false}}}}});
+  insTrend.innerHTML=`<b>인사이트:</b> 공연관람이 추세를 주도하나 <b>덕질·댄스</b>는 연초(1월) 반등. 비수기 콜라보 테마로 <b>팬덤·체험형</b> 콘텐츠가 유효합니다.`;
+}
+function renderSpend(){
+  const L=labelsOf();
+  if(charts.s){charts.s.data.labels=L;charts.s.data.datasets[0].data=D.spendTotal;charts.s.data.datasets[0].backgroundColor=D.spendTotal.map((v,i)=>i===peakIdx(D.spendTotal)?'#FFB81C':'#E6a8cf');charts.s.update();}
+  else charts.s=new Chart(chSpendTotal,{type:'bar',data:{labels:L,datasets:[{data:D.spendTotal,backgroundColor:D.spendTotal.map((v,i)=>i===peakIdx(D.spendTotal)?'#FFB81C':'#E6a8cf'),borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.y+' 억원'}}},scales:{y:{grid:{color:'#F0EAF5'},ticks:{callback:v=>v+'억'}},x:{grid:{display:false}}}}});
+  const p=peakIdx(D.spendTotal),l=lowIdx(D.spendTotal);
+  insSpend.innerHTML=`<b>인사이트:</b> ${labelsOf()[p]} ${D.spendTotal[p]}억 최대 · ${labelsOf()[l]} ${D.spendTotal[l]}억 최저. 가을·연말 소비 성수기 vs 비수기 격차 뚜렷.`;
+}
+function renderComp(){
+  if(charts.c){charts.c.data.labels=D.comp.labels;charts.c.data.datasets[0].data=D.comp.vals;charts.c.update();}
+  else charts.c=new Chart(chComp,{type:'doughnut',data:{labels:D.comp.labels,datasets:[{data:D.comp.vals,backgroundColor:PAL,borderWidth:3,borderColor:'#fff',hoverOffset:8}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'56%',plugins:{legend:{position:'right',labels:{usePointStyle:true,boxWidth:8,padding:10,font:{size:11.5,weight:'600'}}},tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return ' '+c.label+': '+(c.parsed/t*100).toFixed(0)+'%';}}}}}});
+  const t=D.comp.vals.reduce((a,b)=>a+b,0);
+  insComp.innerHTML=`<b>인사이트:</b> 쇼핑·외식이 소비의 <b>${((D.comp.vals[0]+D.comp.vals[1])/t*100).toFixed(0)}%</b>. 입장권 외 <b>식음·MD 결합 패키지</b>로 객단가 확대 여력이 큽니다.`;
+}
+function renderPark(){
+  const L=labelsOf();
+  if(charts.p){charts.p.data.labels=L;charts.p.data.datasets[0].data=D.park;charts.p.update();}
+  else charts.p=new Chart(chPark,{type:'line',data:{labels:L,datasets:[{label:'관광유원시설 카드소비',data:D.park,borderColor:'#ED1C24',backgroundColor:'rgba(237,28,36,.10)',borderWidth:3,tension:.4,fill:true,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#ED1C24'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.y+' 백만원'}}},scales:{y:{grid:{color:'#F0EAF5'},ticks:{callback:v=>v+'M'}},x:{grid:{display:false}}}}});
+  const p=peakIdx(D.park),l=lowIdx(D.park);
+  insPark.innerHTML=`<b>인사이트:</b> ${labelsOf()[p]} 최대 ${D.park[p]} vs ${labelsOf()[l]} 최저 ${D.park[l]}(<b>${(D.park[p]/D.park[l]).toFixed(1)}배</b>). <b>비수기(겨울·초봄) 집중 마케팅</b>이 시뮬레이터 시기계수의 근거입니다.`;
+}
+function renderAll(){renderMention();renderKwTop();renderKwTrend();renderSpend();renderComp();renderPark();}
+renderAll();
+
+/* ===== 연도별·연령대별 (국민여행조사) ===== */
+const D2={
+  years:[2021,2022,2023,2024],
+  totalSpend:[25915,34533,37816,36800], // 십억원
+  tripCount:[245127,283722,296977,291825], // 천회
+  arpu:[567,756,824,795], // 천원
+  expRate:[93.9,94.2,95.5,95.4], // %
+  ages:['15-19세','20대','30대','40대','50대','60대','70대+'],
+  ageSpend:[908,5897,7232,7150,7529,5818,2266], // 2024 십억원
+  ageTrips:[9424,44163,52237,59163,59100,45476,22261] // 2024 천회
+};
+function renderYearScale(){const L=D2.years.map(String);
+  const sp=D2.totalSpend.map(v=>+(v/1000).toFixed(1)), tp=D2.tripCount.map(v=>+(v/1000).toFixed(1));
+  if(charts.ys){charts.ys.data.labels=L;charts.ys.data.datasets[0].data=sp;charts.ys.data.datasets[1].data=tp;charts.ys.update();}
+  else charts.ys=new Chart(chYearScale,{data:{labels:L,datasets:[
+    {type:'bar',label:'총 여행지출(조원)',data:sp,backgroundColor:'#E6a8cf',borderRadius:6,yAxisID:'y',order:2},
+    {type:'line',label:'여행 횟수(백만회)',data:tp,borderColor:'#E6007E',backgroundColor:'#E6007E',borderWidth:3,tension:.4,pointRadius:3,yAxisID:'y1',order:1}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8,padding:10,font:{size:11,weight:'600'}}}},scales:{y:{position:'left',grid:{color:'#F0EAF5'},title:{display:true,text:'조원'}},y1:{position:'right',grid:{display:false},title:{display:true,text:'백만회'}},x:{grid:{display:false}}}}});
+  const a=D2.totalSpend[0]/1000,b=D2.totalSpend[D2.totalSpend.length-1]/1000;
+  insYear.innerHTML=`<b>인사이트:</b> 총 여행지출 ${a.toFixed(1)}조(${D2.years[0]}) → ${b.toFixed(1)}조(${D2.years[D2.years.length-1]}), <b>${((b/a-1)*100).toFixed(0)}% 성장</b>. 코로나 회복 후 내수 관광시장 확대.`;
+}
+function renderYearRate(){const L=D2.years.map(String);
+  if(charts.yr){charts.yr.data.labels=L;charts.yr.data.datasets[0].data=D2.arpu;charts.yr.data.datasets[1].data=D2.expRate;charts.yr.update();}
+  else charts.yr=new Chart(chYearRate,{data:{labels:L,datasets:[
+    {type:'line',label:'1인 객단가(천원)',data:D2.arpu,borderColor:'#FFB81C',backgroundColor:'#FFB81C',borderWidth:3,tension:.4,pointRadius:3,yAxisID:'y'},
+    {type:'line',label:'관광 경험률(%)',data:D2.expRate,borderColor:'#16C79A',backgroundColor:'#16C79A',borderWidth:3,tension:.4,pointRadius:3,yAxisID:'y1'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8,padding:10,font:{size:11,weight:'600'}}}},scales:{y:{position:'left',grid:{color:'#F0EAF5'},title:{display:true,text:'천원'}},y1:{position:'right',min:80,max:100,grid:{display:false},title:{display:true,text:'%'}},x:{grid:{display:false}}}}});
+  const p=peakIdx(D2.arpu);
+  insRate.innerHTML=`<b>인사이트:</b> 1인 객단가 ${D2.years[p]}년 ${D2.arpu[p]}천원 정점 후 ${D2.arpu[D2.arpu.length-1]}천원. 경험률 ${D2.expRate[D2.expRate.length-1]}% 안착 — <b>1회당 가치(객단가) 제고</b>가 관건.`;
+}
+function renderAge(){const L=D2.ages, tp=D2.ageTrips.map(v=>+(v/1000).toFixed(1));
+  if(charts.ag){charts.ag.data.labels=L;charts.ag.data.datasets[0].data=D2.ageSpend;charts.ag.data.datasets[1].data=tp;charts.ag.update();}
+  else charts.ag=new Chart(chAge,{data:{labels:L,datasets:[
+    {type:'bar',label:'여행지출(십억원)',data:D2.ageSpend,backgroundColor:'#7B2D8E',borderRadius:6,yAxisID:'y'},
+    {type:'bar',label:'여행횟수(백만회)',data:tp,backgroundColor:'#FF5BAA',borderRadius:6,yAxisID:'y1'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8,padding:10,font:{size:11,weight:'600'}}}},scales:{y:{position:'left',grid:{color:'#F0EAF5'},title:{display:true,text:'십억원'}},y1:{position:'right',grid:{display:false},title:{display:true,text:'백만회'}},x:{grid:{display:false}}}}});
+  const mi=peakIdx(D2.ageSpend);
+  insAge.innerHTML=`<b>인사이트:</b> 지출 1위 <b>${L[mi]}</b>. 30~50대가 지출·여행횟수를 주도 → 동반 키즈 기반 <b>가족 패키지</b>가 롯데월드 유입 핵심, 20대 MZ는 SNS 확산 채널.`;
+}
+renderYearScale();renderYearRate();renderAge();
+
+/* ===== 통계 / 예측 유틸 (투명) ===== */
+const sumA=a=>a.reduce((x,y)=>x+(+y||0),0);
+const meanA=a=>a.length?sumA(a)/a.length:0;
+function linreg(ys){const n=ys.length,xs=ys.map((_,i)=>i),mx=meanA(xs),my=meanA(ys);let nu=0,de=0;
+  for(let i=0;i<n;i++){nu+=(xs[i]-mx)*(ys[i]-my);de+=(xs[i]-mx)**2;}const slope=de?nu/de:0;return{slope,intercept:my-slope*mx};}
+function seasonalIdx(y,p=12){const m=meanA(y)||1;if(y.length>=p){const idx=[];for(let q=0;q<p;q++){const v=[];for(let i=q;i<y.length;i+=p)v.push(y[i]);idx.push((meanA(v)||m)/m);}return idx;}return y.map(v=>v/m);}
+function forecastSeries(y,h,p=12){const si=seasonalIdx(y,p);const des=y.map((v,i)=>v/(si[i%si.length]||1));const{slope,intercept}=linreg(des);
+  const sd=Math.sqrt(meanA(des.map((v,i)=>(v-(intercept+slope*i))**2)));
+  const out=[];for(let k=1;k<=h;k++){const i=y.length+k-1;const s=si[i%si.length]||1;const base=(intercept+slope*i)*s;const band=1.28*sd*s*Math.sqrt(k);
+    out.push({mean:Math.max(0,base),lo:Math.max(0,base-band),hi:base+band});}return out;}
+function mape(y,p=12){if(y.length<p+3)return null;const k=Math.min(3,y.length-2);if(k<1)return null;const e=[];
+  for(let h=k;h>=1;h--){const tr=y.slice(0,y.length-h);if(tr.length<3)continue;const si=seasonalIdx(tr,p);const des=tr.map((v,i)=>v/(si[i%si.length]||1));const{slope,intercept}=linreg(des);const i=tr.length;const pr=(intercept+slope*i)*(si[i%si.length]||1);const ac=y[y.length-h];if(ac)e.push(Math.abs((ac-pr)/ac));}
+  return e.length?+(meanA(e)*100).toFixed(1):null;}
+function addMonths(ym,k){let y=Math.floor(ym/100),m=ym%100+k;y+=Math.floor((m-1)/12);m=((m-1)%12+12)%12+1;return y*100+m;}
+const calOf=ym=>((ym%100)-1+12)%12;
+
+/* ===== 시설 모델 프로파일 (가정값, 명시) ===== */
+const MONTHS=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+let parkByCal=[28.0,34.4,38.8,49.4,58.1,41.7,46.8,59.7,39.9,69.1,43.4,32.4]; // 전국 관광유원시설 달력월(백만원)
+const VENUES={
+  all:{name:'전국 기준',adj:[1,1,1,1,1,1,1,1,1,1,1,1],foreign:.15,baseAnnual:null,cap:null,color:'#7B2D8E',note:''},
+  seoul:{name:'서울 잠실 롯데월드',adj:[1.35,1.25,1.05,1.0,0.95,1.05,1.0,1.0,1.05,0.95,1.1,1.25],foreign:.25,baseAnnual:760,cap:110,color:'#E6007E',note:'실내·연중·외국인↑'},
+  busan:{name:'부산 롯데월드',adj:[0.7,0.75,0.95,1.1,1.15,1.05,1.25,1.3,1.05,1.05,0.8,0.7],foreign:.10,baseAnnual:260,cap:42,color:'#00A0E9',note:'실외·여름집중·영남권'}
+};
+const state={venue:'all'};
+const actSel={venue:'seoul',month:0};
+const demandCal=v=>parkByCal.map((x,m)=>x*VENUES[v].adj[m]);
+function coefFor(v){const d=demandCal(v),a=meanA(d);return d.map(x=>Math.min(1.3,Math.max(0.9,Math.round(a/x*100)/100)));}
+function visitorsCal(v){if(!VENUES[v].baseAnnual)return null;const d=demandCal(v),a=meanA(d),mb=VENUES[v].baseAnnual/12;return d.map(x=>x/a*mb);}
+function demandDataOrder(v){const d=demandCal(v);return D.ymList.map(ym=>d[calOf(ym)]);}
+function mentionByCal(){const a=Array(12).fill(0),c=Array(12).fill(0);D.ymList.forEach((ym,i)=>{const m=calOf(ym);a[m]+=D.mention[i]||0;c[m]++;});return a.map((s,m)=>c[m]?s/c[m]:0);}
+
+/* ===== 시뮬레이터 핵심(순수) ===== */
+const SEGMENTS=[{t:'청년 MZ',c:1.15,d:'SNS 확산'},{t:'외국인 관광',c:1.20,d:'K-Culture 인바운드'},{t:'가족·키즈',c:1.30,d:'동반·고객단가'},{t:'시니어·단체',c:1.10,d:'관광버스'}];
+const CONV=0.5,BASE=1.5,ARPU=5.4,MULT=2.1;
+function estimate(cal,segC,budget,v,conv=CONV){const mc=coefFor(v)[cal];let visitor=budget*mc*segC*conv*BASE,capped=false;
+  const vc=visitorsCal(v);if(vc){const head=Math.max(0,VENUES[v].cap-vc[cal]);if(visitor>head){visitor=head;capped=true;}}
+  const revenue=visitor*ARPU,effect=revenue*MULT,roi=budget?effect/budget:0;return{mc,visitor,revenue,effect,roi,capped};}
+
+/* ===== 시뮬레이터 UI ===== */
+let MONTH_COEF=coefFor(state.venue);
+const SEASON=i=>{const c=MONTH_COEF[i];return c>=1.25?{t:'비수기',cls:'low'}:c<=0.95?{t:'성수기',cls:'high'}:{t:'준성수기',cls:'mid'}};
+let sMonth=0,sSeg=SEGMENTS[0],sBudget=22;
+const mg=document.getElementById('monthGrid');const monthEls=[];
+MONTHS.forEach((m,i)=>{const d=document.createElement('div');d.className='opt'+(i===sMonth?' on':'');
+  d.innerHTML=`<div class="t">${m}</div><div class="c">×${MONTH_COEF[i]}</div>`;
+  d.onclick=()=>{sMonth=i;monthEls.forEach(x=>x.classList.remove('on'));d.classList.add('on');calc();};mg.appendChild(d);monthEls.push(d);});
+const sg=document.getElementById('segGrid');
+SEGMENTS.forEach((s,i)=>{const d=document.createElement('div');d.className='opt'+(i===0?' on':'');
+  d.innerHTML=`<div class="t">${s.t}</div><div class="c">×${s.c} · ${s.d}</div>`;
+  d.onclick=()=>{sSeg=s;[...sg.children].forEach(x=>x.classList.remove('on'));d.classList.add('on');calc();};sg.appendChild(d);});
+const bd=document.getElementById('budget');
+bd.oninput=()=>{sBudget=+bd.value;budgetVal.textContent=sBudget;calc();};
+const fmt=n=>n.toLocaleString('ko-KR',{maximumFractionDigits:1});
+function refreshMonthLabels(){monthEls.forEach((d,i)=>{const c=d.querySelector('.c');if(c)c.textContent='×'+MONTH_COEF[i];});}
+function calc(){const v=state.venue;
+  const base=estimate(sMonth,sSeg.c,sBudget,v,0.5),wst=estimate(sMonth,sSeg.c,sBudget,v,0.4),bst=estimate(sMonth,sSeg.c,sBudget,v,0.6);
+  oVisitor.textContent=fmt(base.visitor);oRevenue.textContent=fmt(base.revenue);oEffect.textContent=fmt(base.effect);oRoi.textContent=base.roi.toFixed(1);
+  oWorst.textContent=fmt(wst.visitor)+'만';oBase.textContent=fmt(base.visitor)+'만';oBest.textContent=fmt(bst.visitor)+'만';
+  simVenue.textContent=VENUES[v].name;
+  const se=SEASON(sMonth);seasonPill.className='season-pill '+se.cls;seasonPill.textContent=`${se.t} · 계수 ${MONTH_COEF[sMonth]} (수요지수 ${demandCal(v)[sMonth].toFixed(0)})`;
+  roiRef.innerHTML=base.roi>=11?'✅ 강진군 모범사례 11배 <b>초과 달성</b>':base.roi>=8?'🟡 강진군 11배 근접 — 비수기·MZ 조합 권장':'🔴 성수기 혼잡으로 탄력성↓ — 비수기 전환 검토';
+  const vc=visitorsCal(v);let capTxt;
+  if(vc){const head=Math.max(0,VENUES[v].cap-vc[sMonth]);const limit=head/(MONTH_COEF[sMonth]*sSeg.c*0.5*BASE);capTxt=`· 효율 한계 예산 ≈ ${fmt(limit)}억 (잔여 캐파 ${fmt(head)}만명)`;if(base.capped)capTxt='· ⚠ 용량 상한 적용됨 '+capTxt;}
+  else capTxt='· 전국 기준(용량 상한 미적용)';
+  oCap.textContent=capTxt;
+  calcSteps.innerHTML=`= ${sBudget} × ${MONTH_COEF[sMonth]} × ${sSeg.c} × ${CONV} × ${BASE} = <b>${fmt(base.visitor)}만명</b>${base.capped?' (캐파 상한)':''}<br>직접매출 <b>${fmt(base.revenue)}억</b> · 생산유발 <b>${fmt(base.effect)}억</b> → ROI <b>${base.roi.toFixed(1)}배</b><br>시나리오 범위: Worst ${fmt(wst.visitor)}만 ~ Best ${fmt(bst.visitor)}만명`;
+}
+
+/* ===== 인사이트 보드 ===== */
+function svgSpark(vals,color){const w=120,h=30,mn=Math.min(...vals),mx=Math.max(...vals),r=(mx-mn)||1;
+  const pts=vals.map((v,i)=>`${(i/(vals.length-1))*w},${(h-((v-mn)/r)*h).toFixed(1)}`).join(' ');
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="${color}" stroke-width="2" points="${pts}"/></svg>`;}
+function deltaTag(cur,prev){const d=prev?((cur-prev)/prev*100):0,up=d>=0;return `<span class="dl ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(d).toFixed(1)}%</span>`;}
+function renderScore(){const v=state.venue,dem=demandDataOrder(v),men=D.mention;
+  const fcD=forecastSeries(dem,6),fcPk=Math.max(...fcD.map(o=>o.mean));
+  const tiles=[
+    {l:'글로벌 K-관심 (최근월)',v:(men[men.length-1]/1000).toFixed(0)+'k',sp:men,c:'#E6007E',d:deltaTag(men[men.length-1],men[men.length-2])},
+    {l:VENUES[v].name+' 수요지수(최근월)',v:dem[dem.length-1].toFixed(0),sp:dem,c:VENUES[v].color,d:deltaTag(dem[dem.length-1],meanA(dem))},
+    {l:'1인 여행 객단가',v:D2.arpu[D2.arpu.length-1]+'천원',sp:D2.arpu,c:'#FFB81C',d:deltaTag(D2.arpu[D2.arpu.length-1],D2.arpu[D2.arpu.length-2])},
+    {l:'향후 6개월 수요 피크(예측)',v:fcPk.toFixed(0),sp:dem.concat(fcD.map(o=>o.mean)),c:'#16C79A',d:deltaTag(fcPk,meanA(dem))}
+  ];
+  scoreGrid.innerHTML=tiles.map(t=>`<div class="score"><div class="l">${t.l}</div><div class="row"><div class="v">${t.v}</div>${t.d}</div>${svgSpark(t.sp,t.c)}</div>`).join('');
+  boardVenue.textContent=VENUES[v].name;
+}
+function oppScores(v){const dem=demandCal(v),mn=Math.min(...dem),mx=Math.max(...dem),men=mentionByCal(),mnMin=Math.min(...men),mnMax=Math.max(...men),coef=coefFor(v);
+  return MONTHS.map((_,m)=>{const dn=(dem[m]-mn)/((mx-mn)||1),head=1-dn,interest=(men[m]-mnMin)/((mnMax-mnMin)||1),elas=(coef[m]-0.9)/0.4;
+    return Math.round(100*(0.4*head+0.3*interest+0.3*elas));});}
+function heatColor(s){const t=Math.max(0,Math.min(100,s))/100,c1=[22,199,154],c2=[255,184,28],c3=[237,28,36];let a,b,f;
+  if(t<0.5){a=c1;b=c2;f=t/0.5;}else{a=c2;b=c3;f=(t-0.5)/0.5;}return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*f)).join(',')})`;}
+function renderHeat(){const rows=['seoul','busan'],sc={seoul:oppScores('seoul'),busan:oppScores('busan')};
+  let html='<div class="hc"></div>'+MONTHS.map(m=>`<div class="hc">${m}</div>`).join('');
+  rows.forEach(v=>{html+=`<div class="rl"><span style="width:9px;height:9px;border-radius:50%;background:${VENUES[v].color}"></span>${v==='seoul'?'서울':'부산'}</div>`;
+    sc[v].forEach((s,m)=>{const sel=(actSel.venue===v&&actSel.month===m)?' sel':'';html+=`<div class="cell${sel}" style="background:${heatColor(s)}" data-v="${v}" data-m="${m}" title="${VENUES[v].name} ${m+1}월 · 기회 ${s}">${s}</div>`;});});
+  heat.innerHTML=html;
+  heat.querySelectorAll('.cell').forEach(c=>c.onclick=()=>{actSel.venue=c.dataset.v;actSel.month=+c.dataset.m;renderHeat();renderActions();});
+}
+function ruleAction(m,v){const men=mentionByCal(),winter=[11,0,1].includes(m),summer=[6,7].includes(m);
+  if(v==='busan'&&summer)return'실외 워터·서머 페스타 + 영남권 가족 패키지';
+  if(winter)return'실내 테마 페스티벌 + 외국인 인바운드(K-공연 연계) 야간개장';
+  if(men[m]>meanA(men))return'K-팝 공연·팬덤 콜라보 패키지 + SNS 챌린지';
+  return'가족·키즈 시즌 패키지 + 지역 제휴 프로모션';}
+function renderActions(){const v=actSel.venue,sc=oppScores(v),order=sc.map((s,m)=>({s,m})).sort((a,b)=>b.s-a.s).slice(0,4);
+  const dem=demandCal(v),mn=Math.min(...dem),mx=Math.max(...dem),men=mentionByCal(),coef=coefFor(v);
+  actVenue.textContent=VENUES[v].name;
+  actGrid.innerHTML=order.map(({s,m})=>{const head=Math.round((1-(dem[m]-mn)/((mx-mn)||1))*100),est=estimate(m,1.15,22,v);
+    return `<div class="act"><div class="top"><div class="mo">${m+1}월</div><div class="sc">기회 ${s}</div></div>
+      <div class="sig">신호 — 수요여력 <b>${head}%</b> · 글로벌관심 <b>${(men[m]/1000).toFixed(0)}k</b> · 시기계수 <b>×${coef[m]}</b></div>
+      <div class="do">▶ ${ruleAction(m,v)}</div>
+      <div class="eff">기대효과(22억·MZ): 추가 <b>${fmt(est.visitor)}만명</b> · 생산유발 <b>${fmt(est.effect)}억</b> · ROI <b>${est.roi.toFixed(1)}배</b>${est.capped?' (캐파상한)':''}</div></div>`;}).join('');
+}
+
+/* ===== 시설 수요지수 비교 차트 ===== */
+function renderDemand(){const L=labelsOf(),mk=v=>({label:VENUES[v].name,data:demandDataOrder(v),borderColor:VENUES[v].color,backgroundColor:'transparent',borderWidth:v==='all'?2:3,borderDash:v==='all'?[5,4]:[],tension:.4,pointRadius:2,pointHoverRadius:5});
+  const ds=['all','seoul','busan'].map(mk);
+  if(charts.dm){charts.dm.data.labels=L;charts.dm.data.datasets=ds;charts.dm.update();}
+  else charts.dm=new Chart(chDemand,{type:'line',data:{labels:L,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8,padding:10,font:{size:11,weight:'600'}}}},scales:{y:{grid:{color:'#F0EAF5'},title:{display:true,text:'수요지수'}},x:{grid:{display:false}}}}});
+  const sD=demandCal('seoul'),bD=demandCal('busan');
+  insDemand.innerHTML=`<b>인사이트(모델):</b> 부산은 8월 피크·1월 골로 <b>진폭 ${(Math.max(...bD)/Math.min(...bD)).toFixed(1)}배</b>(실외형), 서울은 <b>${(Math.max(...sD)/Math.min(...sD)).toFixed(1)}배</b>로 평탄(실내형). → 부산=여름 집중, 서울=겨울 비수기 공략 여지.`;
+}
+
+/* ===== 예측 차트 ===== */
+function fcChart(key,canvas,hist,color,mapeEl){const h=6,fc=forecastSeries(hist,h),n=hist.length;
+  const lastYm=D.ymList[D.ymList.length-1],fL=[];for(let k=1;k<=h;k++)fL.push(fmtYM(addMonths(lastYm,k)));
+  const L=labelsOf().concat(fL);
+  const histD=hist.concat(Array(h).fill(null));
+  const meanD=Array(n).fill(null).concat(fc.map(o=>+o.mean.toFixed(1)));meanD[n-1]=hist[n-1];
+  const loD=Array(n).fill(null).concat(fc.map(o=>+o.lo.toFixed(1)));
+  const hiD=Array(n).fill(null).concat(fc.map(o=>+o.hi.toFixed(1)));
+  const ds=[
+    {label:'실측',data:histD,borderColor:color,backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:2},
+    {label:'예측',data:meanD,borderColor:color,borderDash:[6,4],backgroundColor:'transparent',borderWidth:2.5,tension:.4,pointRadius:2},
+    {label:'상한',data:hiD,borderColor:'transparent',backgroundColor:color+'22',fill:'+1',tension:.4,pointRadius:0},
+    {label:'하한',data:loD,borderColor:'transparent',backgroundColor:'transparent',fill:false,tension:.4,pointRadius:0}
+  ];
+  if(charts[key]){charts[key].data.labels=L;charts[key].data.datasets=ds;charts[key].update();}
+  else charts[key]=new Chart(canvas,{type:'line',data:{labels:L,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#F0EAF5'}},x:{grid:{display:false}}}}});
+  const mp=mape(hist);if(mapeEl)mapeEl.textContent=mp!=null?`정확도 MAPE ${mp}%`:'검증 보류·1주기';
+  return fc;
+}
+function renderForecast(){const v=state.venue,dem=demandDataOrder(v),lastYm=D.ymList[D.ymList.length-1];
+  const fc=fcChart('fc',chForecast,dem,VENUES[v].color,fcMape);
+  fcVenue.textContent=VENUES[v].name;
+  fcTable.innerHTML='<tr><th>월</th>'+fc.map((_,k)=>`<th>${fmtYM(addMonths(lastYm,k+1))}</th>`).join('')+'</tr>'+
+    '<tr><td>예측</td>'+fc.map(o=>`<td><b>${o.mean.toFixed(0)}</b></td>`).join('')+'</tr>'+
+    '<tr><td>80% 구간</td>'+fc.map(o=>`<td>${o.lo.toFixed(0)}~${o.hi.toFixed(0)}</td>`).join('')+'</tr>';
+  fcChart('fcm',chForecastM,D.mention,'#00A0E9',fcMapeM);
+  const mEnd=forecastSeries(D.mention,6)[5].mean,pk=Math.max(...fc.map(o=>o.mean)),pki=fc.findIndex(o=>o.mean===pk);
+  insFc.innerHTML=`<b>예측:</b> 글로벌 관심은 추세상 ${mEnd.toFixed(0)}건 내외로 수렴. 시설 수요는 <b>${fmtYM(addMonths(lastYm,pki+1))}</b> 경 피크 예상.`;
+}
+
+/* ===== 중앙 재계산 ===== */
+function rebuildDerived(){MONTH_COEF=coefFor(state.venue);refreshMonthLabels();renderScore();renderHeat();renderActions();renderDemand();renderForecast();calc();}
+
+document.querySelectorAll('#venueSeg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#venueSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  state.venue=b.dataset.v;const vn=VENUES[state.venue];
+  if(state.venue!=='all')actSel.venue=state.venue; // 추천 액션도 동일 시설로 동기화
+  venueNote.innerHTML=vn.note?`<b>${vn.name}</b> · ${vn.note} (모델 가정 프로파일)`:'전국/글로벌 실데이터 기준';
+  rebuildDerived();});
+venueNote.innerHTML='전국/글로벌 실데이터 기준';
+rebuildDerived();
+
+/* ===== CSV 업로드 파서 ===== */
+const log=document.getElementById('upLog');
+function addLog(msg,err){const s=document.createElement('span');if(err)s.className='err';s.textContent=(err?'⚠ ':'✓ ')+msg;log.appendChild(s);}
+function splitCSV(line){return line.split(',').map(c=>c.trim());}
+function parseNum(s){return parseFloat(String(s).replace(/[",\s]/g,''))||0;}
+function handleCSV(text,fname){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim().length);
+  if(lines.length<2){addLog(fname+': 빈 파일',1);return;}
+  const head=splitCSV(lines[0]);
+  const idx=n=>head.findIndex(h=>h.replace(/\s/g,'').includes(n));
+  const rows=lines.slice(1).map(splitCSV);
+  const has=n=>idx(n)>=0;
+  try{
+    if(has('기준년도')&&has('연령대')){ // 국민여행조사 (연도별·연령대별)
+      const iY=idx('기준년도'),iA=idx('연령대'),iV=head.length-1;
+      const years=[...new Set(rows.map(r=>+r[iY]))].sort((a,b)=>a-b);D2.years=years;
+      const totalByYear=years.map(y=>{const r=rows.find(r=>+r[iY]===y&&r[iA]==='전체');return r?parseNum(r[iV]):0;});
+      const lastY=years[years.length-1];
+      const ageRows=rows.filter(r=>+r[iY]===lastY&&r[iA]!=='전체');
+      const setAges=()=>{if(ageRows.length){D2.ages=ageRows.map(r=>r[iA].replace('세 이상','+').replace(' 이상','+'));}};
+      if(has('천원')){D2.arpu=totalByYear;renderYearRate();addLog(fname+' → 1인 객단가(연도별)');}
+      else if(has('십억')){D2.totalSpend=totalByYear;setAges();D2.ageSpend=ageRows.map(r=>parseNum(r[iV]));renderYearScale();renderAge();addLog(fname+' → 총 여행지출(연도·연령)');}
+      else if(has('경험률')){D2.expRate=totalByYear;renderYearRate();addLog(fname+' → 관광 경험률(연도별)');}
+      else if(has('여행')){D2.tripCount=totalByYear;setAges();D2.ageTrips=ageRows.map(r=>parseNum(r[iV]));renderYearScale();renderAge();addLog(fname+' → 여행 횟수(연도·연령)');}
+      else addLog(fname+': 연도 데이터 미인식',1);
+    } else if(has('중분류')&&has('지출액')){
+      const iY=idx('기준년월'),iC=idx('중분류'),iV=idx('지출액');
+      const ymSet=[...new Set(rows.map(r=>+r[iY]))].sort((a,b)=>a-b);
+      D.ymList=ymSet;
+      D.spendTotal=ymSet.map(ym=>{const r=rows.find(r=>+r[iY]===ym&&r[iC]==='관광총소비');return r?+(parseNum(r[iV])/1e8).toFixed(1):0;});
+      D.park=ymSet.map(ym=>{const r=rows.find(r=>+r[iY]===ym&&r[iC]==='관광유원시설');return r?+(parseNum(r[iV])/1e6).toFixed(1):0;});
+      const last=ymSet[ymSet.length-1];const g={};rows.filter(r=>+r[iY]===last).forEach(r=>{g[r[iC]]=parseNum(r[iV])/1e6;});
+      const B=arr=>arr.reduce((s,k)=>s+(g[k]||0),0);
+      D.comp={labels:['쇼핑','외식','교통','레저·관광','숙박','여행업'],vals:[
+        +B(['대형쇼핑몰','기타관광쇼핑','레저용품쇼핑','면세점']).toFixed(0),
+        +B(['일반외식업','제과음료업']).toFixed(0),
+        +B(['육상운송','항공운송','렌터카','수상운송']).toFixed(0),
+        +B(['골프장','기타레저','관광유원시설','문화서비스','스키장']).toFixed(0),
+        +B(['호텔','콘도','캠핑장/펜션','기타숙박']).toFixed(0),
+        +B(['여행업']).toFixed(0)]};
+      const pc=Array(12).fill(null);ymSet.forEach((ym,i)=>{pc[calOf(ym)]=D.park[i];});
+      if(pc.every(x=>x!=null&&x>0))parkByCal=pc; // 업로드 실측으로 시즌성 갱신
+      renderSpend();renderComp();renderPark();addLog(fname+' → 관광 카드소비 ('+ymSet.length+'개월)');
+    } else if(has('기준년월')&&has('키워드')&&has('언급량')){
+      const iY=idx('기준년월'),iK=idx('키워드'),iV=idx('언급량');
+      const ymSet=[...new Set(rows.map(r=>+r[iY]))].sort((a,b)=>a-b);D.ymList=ymSet;
+      const sum={};rows.forEach(r=>{sum[r[iK]]=(sum[r[iK]]||0)+parseNum(r[iV]);});
+      const top=Object.entries(sum).sort((a,b)=>b[1]-a[1]).slice(0,10);
+      D.kwTop={labels:top.map(t=>t[0].replace(/_/g,'·').slice(0,16)),vals:top.map(t=>t[1])};
+      const tr={};top.slice(0,5).forEach(t=>{tr[t[0].slice(0,10)]=ymSet.map(ym=>{const r=rows.find(r=>+r[iY]===ym&&r[iK]===t[0]);return r?parseNum(r[iV]):0;});});
+      D.kwTrend=tr;renderKwTop();renderKwTrend();addLog(fname+' → 키워드 월별 언급량');
+    } else if(has('기준년월')&&has('언급량')&&!has('키워드')){
+      const iY=idx('기준년월'),iV=idx('언급량');
+      const ymSet=[...new Set(rows.map(r=>+r[iY]))].sort((a,b)=>a-b);D.ymList=ymSet;
+      D.mention=ymSet.map(ym=>{const r=rows.find(r=>+r[iY]===ym);return r?parseNum(r[iV]):0;});
+      renderMention();addLog(fname+' → 글로벌 언급량 ('+ymSet.length+'개월)');
+    } else if(has('순위')&&has('키워드')&&has('언급량')){
+      const iK=idx('키워드'),iV=idx('언급량');
+      const top=rows.map(r=>[r[iK],parseNum(r[iV])]).sort((a,b)=>b[1]-a[1]).slice(0,10);
+      D.kwTop={labels:top.map(t=>t[0].replace(/_/g,'·').slice(0,16)),vals:top.map(t=>t[1])};
+      renderKwTop();addLog(fname+' → 키워드 TOP10');
+    } else if(has('순위')&&has('기준년월')&&has('키워드')){
+      addLog(fname+' → 키워드 순위(참고용, 차트 미반영)');
+    } else addLog(fname+': 형식 미인식',1);
+    rebuildDerived(); // 업로드 데이터로 인사이트·예측 재계산
+  }catch(e){addLog(fname+': 파싱 오류',1);}
+}
+function readFiles(files){[...files].forEach(f=>{const r=new FileReader();r.onload=e=>handleCSV(e.target.result,f.name);r.readAsText(f,'utf-8');});}
+const dz=document.getElementById('dropzone'),fi=document.getElementById('fileInput');
+document.getElementById('pickBtn').onclick=()=>fi.click();
+fi.onchange=e=>readFiles(e.target.files);
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
+dz.addEventListener('drop',e=>readFiles(e.dataTransfer.files));
+
+document.querySelectorAll('.fade').forEach(el=>new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')}),{threshold:.06}).observe(el));
+</script>
+</body>
+</html>
