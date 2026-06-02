@@ -52,6 +52,13 @@
     bolt:'M13 2L3 14h9l-1 8 10-12h-9z',
     award:'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M8.21 13.89L7 23l5-3 5 3-1.21-9.12',
     list:'M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01',
+    columns:'M3 3h18v18H3z M9 3v18 M15 3v18',
+    download:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3',
+    copy:'M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-1 M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
+    send:'M22 2L11 13 M22 2l-7 20-4-9-9-4z',
+    spark:'M12 2l1.9 5.8L20 9.7l-5 3.6 1.8 6.1L12 16l-4.8 3.4L9 13.3 4 9.7l6.1-1.9z',
+    bell:'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0',
+    grip:'M9 5h.01 M9 12h.01 M9 19h.01 M15 5h.01 M15 12h.01 M15 19h.01',
   };
   const ico = (n, cls='') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${(I[n]||'').split(' M').map((p,i)=>`<path d="${i?'M'+p:p}"/>`).join('')}</svg>`;
 
@@ -87,11 +94,74 @@
   function stageBadge(key){ const s=S.stageInfo(key); return `<span class="badge ${s.badge}"><span class="d" style="background:currentColor"></span>${s.label}</span>`; }
   function trackBadge(t){ const c=trackColor(t); return `<span class="badge" style="background:${c}1a;color:${c}"><span class="d" style="background:${c}"></span>${esc(t)}</span>`; }
 
+  /* ── Export (Excel / CSV) ─────────────────────────────── */
+  function exportExcel(){
+    const rows = S.exportRows();
+    if (typeof XLSX === 'undefined'){ toast('엑셀 라이브러리를 불러오지 못했습니다(인터넷 필요)','err'); return; }
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), '신청자평가현황');
+    // 트랙별 최종 순위 시트
+    const tracks = [...new Set(S.applicants().map(a=>a.track))];
+    const rank = [];
+    tracks.forEach(tr=>{
+      S.applicants().filter(a=>a.track===tr && ['interview','interview_done','final_pass','final_fail'].includes(S.stageOf(a.id)))
+        .map(a=>({a, itv:S.evalOf(a.id).itv}))
+        .sort((x,y)=>(y.itv?.total??-1)-(x.itv?.total??-1))
+        .forEach((c,i)=> rank.push({ 트랙:tr, 순위:i+1, 이름:c.a.name, 인터뷰평균:c.itv?c.itv.total:'', 결과:S.stageInfo(S.stageOf(c.a.id)).label }));
+    });
+    if (rank.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rank), '트랙별최종순위');
+    XLSX.writeFile(wb, `선발현황_${new Date().toISOString().slice(0,10)}.xlsx`);
+    toast('엑셀 파일을 내려받았습니다','ok');
+  }
+  function exportCSV(){
+    const rows = S.exportRows(); if(!rows.length) return;
+    const head = Object.keys(rows[0]);
+    const csv = '﻿' + [head.join(','), ...rows.map(r=>head.map(h=>{
+      const v = String(r[h]??''); return /[",\n]/.test(v) ? `"${v.replace(/"/g,'""')}"` : v;
+    }).join(','))].join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href=url; a.download=`선발현황_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    URL.revokeObjectURL(url); toast('CSV 파일을 내려받았습니다','ok');
+  }
+
+  /* ── 결과 통보문 생성 모달 ────────────────────────────── */
+  function notifyTemplates(a){
+    const prog = a.program || a.track;
+    return {
+      pass:`${a.name} 님, 안녕하세요.\n\n2026 청년일경험지원사업 [커넥팅더닷츠] ‘${prog}’ 선발에 최종 합격하셨음을 안내드립니다.\n진심으로 축하드립니다. 세부 일정(오리엔테이션·근무 시작일)은 추후 개별 안내 예정입니다.\n\n감사합니다.\n건국대학교 한국지속가능경영연구원 드림`,
+      itv:`${a.name} 님, 안녕하세요.\n\n서류 심사 결과 ‘${prog}’ 인터뷰 심사 대상자로 선정되셨습니다.\n아래 일정으로 인터뷰를 진행하오니 참석 부탁드립니다.\n\n· 일시: (기재)\n· 장소/방식: (기재)\n· 준비물: 신분증\n\n문의: 운영사무국\n감사합니다.`,
+      fail:`${a.name} 님, 안녕하세요.\n\n2026 청년일경험지원사업 [커넥팅더닷츠] ‘${prog}’에 관심을 갖고 지원해 주셔서 진심으로 감사드립니다.\n아쉽게도 이번 선발에서는 함께하지 못하게 되었음을 안내드립니다.\n지원자님의 앞날에 좋은 결과가 함께하길 응원합니다.\n\n건국대학교 한국지속가능경영연구원 드림`,
+    };
+  }
+  function notifyModal(a){
+    const tpl = notifyTemplates(a);
+    const tabs = [['pass','합격 통보'],['itv','면접 안내'],['fail','불합격 통보']];
+    modal({ title:`결과 통보문 — ${a.name}`, icon:'send', iconBg:'var(--teal-dark)',
+      body:`<div class="tabs" id="ntabs">${tabs.map((t,i)=>`<div class="tab ${i===0?'active':''}" data-nt="${t[0]}">${t[1]}</div>`).join('')}</div>
+        <textarea class="inp" id="ntext" style="width:100%;min-height:220px;margin-top:14px;line-height:1.7">${esc(tpl.pass)}</textarea>
+        <div class="cell-sub" style="margin-top:8px">수신: ${esc(a.email||'이메일 없음')}</div>`,
+      footer:`<button class="btn btn-ghost" id="ncopy">${ico('copy')}복사</button>
+        ${a.email?`<button class="btn btn-ghost" id="nmail">${ico('mail')}메일 열기</button>`:''}
+        <button class="btn btn-primary" data-close>닫기</button>`,
+      onOpen:r=>{
+        const ta=r.querySelector('#ntext');
+        r.querySelectorAll('[data-nt]').forEach(t=>t.onclick=()=>{
+          r.querySelectorAll('[data-nt]').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+          ta.value = tpl[t.dataset.nt]; });
+        r.querySelector('#ncopy').onclick=()=>{ navigator.clipboard?.writeText(ta.value); toast('통보문을 복사했습니다','ok'); };
+        const mb=r.querySelector('#nmail'); if(mb) mb.onclick=()=>{
+          const sub=encodeURIComponent('[커넥팅더닷츠] 선발 결과 안내');
+          window.open(`mailto:${a.email}?subject=${sub}&body=${encodeURIComponent(ta.value)}`); };
+      } });
+  }
+
   /* ───────────────── 사이드바 ───────────────── */
   const NAV = [
     { group:'현황', items:[
       { route:'dashboard',  label:'대시보드',     icon:'dash' },
       { route:'applicants', label:'신청자 현황',  icon:'users', countKey:'total' },
+      { route:'pipeline',   label:'파이프라인 보드', icon:'columns' },
     ]},
     { group:'선발 프로세스', items:[
       { route:'document',  label:'서류심사',   icon:'doc',    countKey:'docTodo' },
@@ -131,10 +201,30 @@
         <div class="sb-sub">커넥팅더닷츠 · 2026</div>
       </div>
       <nav class="sb-nav">${groups}</nav>
+      <div class="sb-reviewer" id="sbReviewer" title="현재 심사위원 — 클릭하여 변경">
+        <div class="rv-ava">${esc(initials(S.getReviewer()))}</div>
+        <div class="rv-info"><span class="rv-label">현재 심사위원</span><strong>${esc(S.getReviewer())}</strong></div>
+        ${ico('refresh','rv-ic')}
+      </div>
       <div class="sb-foot">
         <strong>건국대학교 한국지속가능경영연구원</strong>
         주관 · 산학협력단 운영
       </div>`;
+    const rv = $('#sbReviewer'); if (rv) rv.onclick = openReviewerModal;
+  }
+
+  function openReviewerModal(){
+    const presets = ['심사위원1','심사위원2','심사위원3','위원장'];
+    modal({ title:'심사위원 전환', icon:'users', iconBg:'var(--navy)',
+      body:`<p style="font-size:13.5px;line-height:1.7;color:var(--text-sub)">평가는 <strong>현재 심사위원</strong> 명의로 저장됩니다. 여러 심사위원이 같은 지원자를 평가하면 점수가 자동으로 평균·편차로 집계됩니다.</p>
+        <div class="field" style="margin-top:14px"><label>심사위원명</label><input class="inp" id="rvName" value="${esc(S.getReviewer())}" placeholder="예: 홍길동 위원"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">${presets.map(p=>`<button class="chip" data-preset="${esc(p)}">${esc(p)}</button>`).join('')}</div>`,
+      footer:`<button class="btn btn-ghost" data-close>취소</button><button class="btn btn-primary" id="rvSave">${ico('check')}전환</button>`,
+      onOpen:r=>{
+        r.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{ r.querySelector('#rvName').value=b.dataset.preset; });
+        r.querySelector('#rvSave').onclick=()=>{ S.setReviewer(r.querySelector('#rvName').value);
+          closeModal(); toast(`심사위원 전환: ${S.getReviewer()}`,'ok'); navigate(); };
+      } });
   }
 
   /* ───────────────── 라우터 ───────────────── */
@@ -273,7 +363,25 @@
       : `<div class="empty">${ico('list')}<div>아직 평가 활동이 없습니다.<br>서류심사부터 시작해 보세요.</div></div>`}
     </div>`;
 
-    $('#view').innerHTML = kpis + funnel + chartsHtml + `<div class="split-2" style="align-items:start">${trackTable}${recent}</div>`;
+    // 다음 할일 추천 (AI 업무 제안형)
+    const actions = S.nextActions();
+    const actionStrip = `<div class="card" style="padding:18px 22px;margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+        <div class="section-title"><span class="dot" style="background:var(--amber)"></span>다음 할 일 추천</div>
+        <span class="cell-sub">현 단계에서 먼저 처리하면 좋은 작업</span>
+        <div style="flex:1"></div>
+        ${ico('spark','')}
+      </div>
+      ${actions.length ? `<div class="action-grid">${actions.map(a=>`
+        <a class="action-card" href="${a.route}" style="--ac:${a.color}">
+          <div class="ac-ic">${ico(a.icon)}</div>
+          <div class="ac-body"><div class="ac-title">${esc(a.title)}</div><div class="ac-desc">${esc(a.desc)}</div></div>
+          <div class="ac-cnt">${a.count}</div>
+        </a>`).join('')}</div>`
+      : `<div class="note" style="margin:0">${ico('check')} 모든 단계의 대기 작업이 없습니다. 진행 상황이 최신 상태입니다.</div>`}
+    </div>`;
+
+    $('#view').innerHTML = kpis + actionStrip + funnel + chartsHtml + `<div class="split-2" style="align-items:start">${trackTable}${recent}</div>`;
 
     // 차트 그리기
     const ds = st.counts;
@@ -304,13 +412,109 @@
   }
 
   /* ════════════════════════════════════════════════════════
+     VIEW: 칸반 파이프라인 보드
+     ════════════════════════════════════════════════════════ */
+  const PIPE_COLS = [
+    { key:'applied',        label:'신청완료',   stages:['applied'],        color:'#9BA8BC' },
+    { key:'doc_review',     label:'서류심사중', stages:['doc_review'],     color:'#3B5BDB' },
+    { key:'doc_pass',       label:'서류합격',   stages:['doc_pass'],       color:'#00A99D' },
+    { key:'interview',      label:'인터뷰대상', stages:['interview'],      color:'#F5A623' },
+    { key:'interview_done', label:'인터뷰완료', stages:['interview_done'], color:'#8C5BE6' },
+    { key:'final_pass',     label:'최종합격',   stages:['final_pass'],     color:'#2BB673' },
+    { key:'rejected',       label:'탈락',       stages:['doc_fail','final_fail'], color:'#E8503A' },
+  ];
+  let pipeTrack = 'all';
+  route('pipeline', () => {
+    destroyCharts();
+    setTop('파이프라인 보드', '전형 단계를 드래그하여 이동 · 칸반 방식 진행 관리',
+      `<a class="btn btn-ghost" href="#/applicants">${ico('list')}목록 보기</a>`);
+    renderPipeline();
+  });
+
+  function renderPipeline(){
+    const tracks = [...new Set(S.applicants().map(a=>a.track))];
+    const chips = `<div class="filters">
+      <button class="chip ${pipeTrack==='all'?'active':''}" data-pt="all">전체 <span class="c">${S.applicants().length}</span></button>
+      ${tracks.map(t=>`<button class="chip ${pipeTrack===t?'active':''}" data-pt="${esc(t)}">${esc(t)} <span class="c">${S.applicants().filter(a=>a.track===t).length}</span></button>`).join('')}
+    </div>`;
+
+    const pool = pipeTrack==='all' ? S.applicants() : S.applicants().filter(a=>a.track===pipeTrack);
+    const cols = PIPE_COLS.map(col=>{
+      const cards = pool.filter(a=>col.stages.includes(S.stageOf(a.id)));
+      return `<div class="kanban-col" data-col="${col.key}">
+        <div class="kanban-col-head" style="--cc:${col.color}">
+          <span class="kc-dot"></span><strong>${col.label}</strong><span class="kc-count">${cards.length}</span>
+        </div>
+        <div class="kanban-drop" data-col="${col.key}">
+          ${cards.map(cardHtml).join('') || `<div class="kanban-empty">없음</div>`}
+        </div>
+      </div>`;
+    }).join('');
+
+    $('#view').innerHTML = `<div class="toolbar">${chips}<div class="toolbar-spacer"></div>
+      <span class="cell-sub">${ico('grip')} 카드를 끌어 다른 단계로 이동</span></div>
+      <div class="kanban">${cols}</div>`;
+
+    $$('#view .chip[data-pt]').forEach(c=>c.onclick=()=>{ pipeTrack=c.dataset.pt; renderPipeline(); });
+    bindKanban();
+  }
+
+  function cardHtml(a){
+    const e = S.evalOf(a.id);
+    const doc = e.doc, itv = e.itv;
+    const score = itv ? itv.total : (doc ? doc.total : null);
+    const tc = trackColor(a.track);
+    return `<div class="kanban-card" draggable="true" data-id="${a.id}">
+      <div class="kc-top">
+        <div class="avatar" style="width:28px;height:28px;font-size:11px;background:${avaColor(a.name)}">${esc(initials(a.name))}</div>
+        <div class="kc-name">${esc(a.name)}</div>
+        ${score!=null?`<span class="kc-score" style="color:${scoreColor(score)}">${score}</span>`:''}
+      </div>
+      <div class="kc-track" style="color:${tc}"><span class="d" style="background:${tc}"></span>${esc(a.track)}</div>
+      ${(doc&&doc.reviewerCount>1)||(itv&&itv.reviewerCount>1)?`<div class="kc-meta">${ico('users')} 심사 ${Math.max(doc?doc.reviewerCount:0,itv?itv.reviewerCount:0)}명</div>`:''}
+    </div>`;
+  }
+
+  function bindKanban(){
+    let dragId = null;
+    $$('#view .kanban-card').forEach(card=>{
+      card.addEventListener('dragstart', e=>{ dragId = card.dataset.id; card.classList.add('dragging');
+        e.dataTransfer.effectAllowed='move'; });
+      card.addEventListener('dragend', ()=>{ card.classList.remove('dragging'); $$('#view .kanban-drop').forEach(d=>d.classList.remove('drop-target')); });
+      card.addEventListener('click', ()=>{ location.hash='#/applicant/'+card.dataset.id; });
+    });
+    $$('#view .kanban-drop').forEach(drop=>{
+      drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('drop-target'); });
+      drop.addEventListener('dragleave', ()=> drop.classList.remove('drop-target'));
+      drop.addEventListener('drop', e=>{ e.preventDefault(); drop.classList.remove('drop-target');
+        if (!dragId) return;
+        const colKey = drop.dataset.col;
+        const col = PIPE_COLS.find(c=>c.key===colKey);
+        // '탈락' 컬럼은 현재 단계에 맞춰 서류/최종 불합격으로 매핑
+        let target = col.stages[0];
+        if (colKey==='rejected'){
+          const cur = S.stageOf(dragId);
+          target = ['interview','interview_done','final_pass'].includes(cur) ? 'final_fail' : 'doc_fail';
+        }
+        if (S.stageOf(dragId)===target){ return; }
+        S.setStage(dragId, target);
+        toast(`${S.getApplicant(dragId).name} → ${S.stageInfo(target).label}`,'ok');
+        renderPipeline(); renderSidebar('pipeline');
+      });
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════
      VIEW: 신청자 현황 (목록)
      ════════════════════════════════════════════════════════ */
   let listState = { q:'', track:'all', stage:'all', sort:'no', dir:1 };
   route('applicants', () => {
     destroyCharts();
     setTop('신청자 현황', '전체 신청자 명단 · 필터/정렬/검색',
-      `<a class="btn btn-ghost" href="#/document">${ico('doc')}서류심사로</a>`);
+      `<button class="btn btn-ghost" id="topCsv">${ico('download')}CSV</button>
+       <button class="btn btn-ghost" id="topXlsx">${ico('download')}Excel</button>
+       <a class="btn btn-ghost" href="#/document">${ico('doc')}서류심사로</a>`);
+    $('#topXlsx').onclick = exportExcel; $('#topCsv').onclick = exportCSV;
     renderApplicantList();
   });
 
@@ -495,10 +699,28 @@
 
     const essays = essay(1,'지원동기',a.motivation) + essay(2,'향후 비전 및 포부 (수행계획)',a.vision) + essay(3,'관련 경력 · 경험',a.career);
 
+    // AI / 규칙 기반 한눈에 보기 요약
+    const summary = window.AI ? window.AI.summarizeApplicant(a) : null;
+    const aiCard = summary ? `<div class="card ai-card">
+      <div class="ai-head">${ico('spark')}<strong>한눈에 보기</strong>
+        <span class="ai-tag">${window.AI.hasKey()?'AI 분석 가능':'규칙 기반'}</span>
+        <div style="flex:1"></div>
+        ${window.AI.hasKey()?`<button class="btn btn-ghost btn-sm" id="aiEnhance">${ico('spark')}AI 요약</button>`:''}
+      </div>
+      <div class="ai-body" id="aiBody">
+        <div class="ai-stats">
+          <span>경력·활동 <strong>${summary.careers}</strong>건</span>
+          <span>지원서 <strong>${summary.wordcount.toLocaleString()}</strong>자</span>
+        </div>
+        ${summary.domains.length?`<div class="ai-kw">${summary.domains.map(k=>`<span class="kw">${esc(k)}</span>`).join('')}</div>`:''}
+        ${summary.highlights.length?`<ul class="ai-hl">${summary.highlights.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>`:'<div class="cell-sub">자동 추출된 강점 문장이 없습니다.</div>'}
+      </div>
+    </div>` : '';
+
     // 평가 패널
-    const docPanel = evalPanelHtml('doc','서류 심사', 'doc', '#00A99D', cfg.docCriteria, ev.doc, stg);
+    const docPanel = evalPanelHtml('doc','서류 심사', 'doc', '#00A99D', cfg.docCriteria, a, stg);
     const showItv = ['interview','interview_done','final_pass','final_fail'].includes(stg);
-    const itvPanel = showItv ? evalPanelHtml('itv','인터뷰 심사','mic','#8C5BE6', cfg.itvCriteria, ev.itv, stg)
+    const itvPanel = showItv ? evalPanelHtml('itv','인터뷰 심사','mic','#8C5BE6', cfg.itvCriteria, a, stg)
       : `<div class="card" style="padding:20px 24px"><div class="note">${ico('mic')} 인터뷰 심사는 <strong>인터뷰 대상자로 선정된 후</strong> 진행할 수 있습니다. 서류 합격 처리 후 ‘인터뷰 심사’ 메뉴에서 대상자로 승급하세요.</div></div>`;
 
     // 단계 제어
@@ -507,7 +729,7 @@
     $('#view').innerHTML = `
       <div style="margin-bottom:16px">${strip}</div>
       <div class="detail-grid">
-        <div>${profile}</div>
+        <div>${profile}${aiCard}</div>
         <div class="detail-main">
           ${controls}
           ${docPanel}
@@ -524,14 +746,63 @@
     bindEvalPanel('doc', a, cfg.docCriteria);
     if (showItv) bindEvalPanel('itv', a, cfg.itvCriteria);
     bindStageControls(a);
+
+    // AI 요약 고도화 (키 있을 때)
+    const enh = $('#aiEnhance');
+    if (enh) enh.onclick = async () => {
+      enh.disabled = true; enh.innerHTML = '분석 중…';
+      try {
+        const txt = await window.AI.enhanceSummary(a);
+        if (txt) $('#aiBody').innerHTML = `<div class="ai-llm">${nl2br(txt)}</div>`;
+      } catch(e){ toast('AI 요약 실패: '+e.message,'err'); enh.disabled=false; enh.innerHTML=`${ico('spark')}AI 요약`; }
+    };
+
+    // 인터뷰 추천 질문 로드
+    const qbtn = $('#itvQbtn');
+    if (qbtn) qbtn.onclick = async () => {
+      const box = $('#itvQbox'); qbtn.disabled = true; qbtn.innerHTML='생성 중…';
+      let qs;
+      try { qs = await window.AI.generateQuestions(a, cfg.itvCriteria); }
+      catch(e){ qs = window.AI.interviewQuestions(a, cfg.itvCriteria); }
+      box.innerHTML = `<ol class="qlist">${qs.map(q=>`<li>${esc(q)}</li>`).join('')}</ol>`;
+      qbtn.disabled=false; qbtn.innerHTML=`${ico('refresh')}다시 생성`;
+    };
   }
 
-  function evalPanelHtml(key, title, icon, color, criteria, saved, stg){
-    const scores = saved? saved.scores : {};
-    const total = saved? saved.total : 0;
+  function evalPanelHtml(key, title, icon, color, criteria, a, stg){
     const maxT = criteria.reduce((s,c)=>s+c.max,0);
+    const agg = S.evalAggregate(a.id, key);
+    const mine = S.myReview(a.id, key);
+    const scores = mine ? mine.scores : {};
+    const myTotal = mine ? mine.total : 0;
+    const reviewer = S.getReviewer();
+
+    // 다중 심사위원 요약
+    let panelSummary = '';
+    if (agg && agg.reviewerCount >= 1){
+      const stdHigh = agg.reviewerCount>=2 && agg.std>=10;
+      panelSummary = `<div class="reviewer-summary">
+        <div class="rs-agg">
+          <div class="rs-avg"><span class="rs-n" style="color:${scoreColor(agg.avgTotal,maxT)}">${agg.avgTotal}</span><span class="rs-l">평균 / ${maxT}</span></div>
+          <div class="rs-div"></div>
+          <div class="rs-meta">
+            <div>심사위원 <strong>${agg.reviewerCount}명</strong></div>
+            <div class="${stdHigh?'rs-warn':''}">편차 σ ${agg.std}${stdHigh?' · 재검토 권장':''}</div>
+          </div>
+        </div>
+        <div class="rs-list">${agg.reviews.map(r=>`
+          <div class="rs-item ${r.reviewer===reviewer?'me':''}">
+            <span class="rs-ava" style="background:${avaColor(r.reviewer)}">${esc(initials(r.reviewer))}</span>
+            <span class="rs-rv">${esc(r.reviewer)}${r.reviewer===reviewer?' (나)':''}</span>
+            <span class="rs-sc" style="color:${scoreColor(r.total,maxT)}">${r.total}</span>
+          </div>`).join('')}</div>
+      </div>`;
+    }
+
     const crits = criteria.map(c=>{
       const v = scores[c.id] ?? 0;
+      const anchors = c.anchors || S.defaultAnchors(c.max);
+      const chips = anchors.map(an=>`<button type="button" class="anchor" data-anchor="${c.id}" data-val="${an.target}" title="${esc(an.desc)}">${an.label}<small>${an.target}</small></button>`).join('');
       return `<div class="crit">
         <div class="crit-top">
           <div><div class="crit-name">${esc(c.name)}<span class="tag ${c.kind==='basic'?'tag-basic':'tag-add'}">${c.kind==='basic'?'기본':'추가'}</span></div>
@@ -541,21 +812,34 @@
         <div class="range-row">
           <input type="range" class="slider" data-crit="${c.id}" min="0" max="${c.max}" step="1" value="${v}">
         </div>
+        <div class="anchor-row">${chips}</div>
       </div>`;
     }).join('');
+
+    // 인터뷰 패널엔 추천 질문 영역
+    const qSection = key==='itv' ? `<div class="qpanel">
+      <div class="qpanel-head"><strong>${ico('spark')} 추천 면접 질문</strong>
+        <span class="ai-tag">${window.AI&&window.AI.hasKey()?'AI 생성 가능':'규칙 기반'}</span>
+        <div style="flex:1"></div>
+        <button class="btn btn-ghost btn-sm" id="itvQbtn">${ico('spark')}질문 생성</button></div>
+      <div id="itvQbox" class="qbox"><div class="cell-sub">‘질문 생성’을 누르면 지원서·평가기준 기반 맞춤 질문이 표시됩니다.</div></div>
+    </div>` : '';
+
     return `<div class="card eval-card" data-eval="${key}">
       <div class="eval-head">
         <div class="ico" style="background:${color}">${ico(icon)}</div>
         <div><h3>${title}</h3><div class="sub">기본 ${criteria.filter(c=>c.kind==='basic').length}항목 + 추가 ${criteria.filter(c=>c.kind==='add').length}항목 · 만점 ${maxT}점</div></div>
-        <div class="total-badge"><div class="n" data-total style="color:${scoreColor(total,maxT)}">${total}</div><div class="l">/ ${maxT}점</div></div>
+        <div class="total-badge"><div class="n" data-total style="color:${scoreColor(myTotal,maxT)}">${myTotal}</div><div class="l">내 점수 / ${maxT}</div></div>
       </div>
+      ${panelSummary}
+      <div class="eval-subhead">${ico('user')} <strong>${esc(reviewer)}</strong> 님의 평가 입력 <span class="cell-sub">— 다른 심사위원으로 바꾸려면 좌측 하단에서 전환</span></div>
       <div class="eval-body">${crits}</div>
+      ${qSection}
       <div class="eval-foot">
-        <textarea class="inp" data-comment placeholder="심사 의견 / 코멘트를 입력하세요 (선택)">${saved?esc(saved.comment):''}</textarea>
+        <textarea class="inp" data-comment placeholder="심사 의견 / 코멘트를 입력하세요 (선택)">${mine?esc(mine.comment):''}</textarea>
         <div class="actions">
-          <input class="inp" data-reviewer placeholder="심사위원명" value="${saved?esc(saved.reviewer):''}" style="width:140px">
-          <button class="btn btn-primary" data-save>${ico('check')}평가 저장</button>
-          <span class="meta" data-savemeta>${saved?`최종 저장 ${ago(saved.date)} · ${esc(saved.reviewer)}`:'미평가'}</span>
+          <button class="btn btn-primary" data-save>${ico('check')}내 평가 저장</button>
+          ${mine?`<span class="meta" data-savemeta>최종 저장 ${ago(mine.date)}</span>`:'<span class="meta">미평가</span>'}
         </div>
       </div>
     </div>`;
@@ -564,6 +848,11 @@
   function bindEvalPanel(key, a, criteria){
     const root = $(`#view .eval-card[data-eval="${key}"]`); if(!root) return;
     const maxT = criteria.reduce((s,c)=>s+c.max,0);
+    const setVal = (id, v) => {
+      const sl = root.querySelector(`[data-crit="${id}"]`); if(!sl) return; sl.value = v;
+      const c = criteria.find(x=>x.id===id);
+      const sv = root.querySelector(`[data-sval="${id}"]`); sv.innerHTML=`${v}<small>/${c.max}</small>`; sv.style.color=scoreColor(v,c.max);
+    };
     const recalc = () => {
       let total=0;
       criteria.forEach(c=>{
@@ -573,13 +862,13 @@
       const tEl = root.querySelector('[data-total]'); tEl.textContent=total; tEl.style.color=scoreColor(total,maxT);
     };
     root.querySelectorAll('[data-crit]').forEach(sl=>sl.oninput=recalc);
+    root.querySelectorAll('[data-anchor]').forEach(b=>b.onclick=()=>{ setVal(b.dataset.anchor, Number(b.dataset.val)); recalc(); });
     root.querySelector('[data-save]').onclick = () => {
       const scores={}; criteria.forEach(c=>scores[c.id]=Number(root.querySelector(`[data-crit="${c.id}"]`).value));
       const comment=root.querySelector('[data-comment]').value;
-      const reviewer=root.querySelector('[data-reviewer]').value.trim()||'심사위원';
-      const total = key==='doc'? S.saveDocEval(a.id,scores,comment,reviewer) : S.saveItvEval(a.id,scores,comment,reviewer);
-      toast(`${key==='doc'?'서류':'인터뷰'} 평가 저장 완료 — ${total}점`,'ok');
-      navigate(); // 단계/배지 갱신 반영
+      const total = key==='doc'? S.saveDocEval(a.id,scores,comment) : S.saveItvEval(a.id,scores,comment);
+      toast(`${key==='doc'?'서류':'인터뷰'} 평가 저장 — 평균 ${total}점 (${S.getReviewer()})`,'ok');
+      navigate(); // 단계/배지/집계 갱신 반영
     };
   }
 
@@ -615,12 +904,14 @@
     }
     return `<div class="card" style="padding:16px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span class="section-title" style="font-size:13.5px"><span class="dot"></span>단계 처리</span>
-      <div style="flex:1"></div>${btns}</div>`;
+      <div style="flex:1"></div>${btns}
+      <button class="btn btn-ghost" data-notify>${ico('send')}결과 통보문</button></div>`;
   }
 
   function bindStageControls(a){
     $$('#view [data-act]').forEach(b=>b.onclick=()=>{ S.setStage(a.id, b.dataset.act);
       toast(`단계 변경: ${S.stageInfo(b.dataset.act).label}`,'ok'); navigate(); });
+    const nb = $('#view [data-notify]'); if(nb) nb.onclick=()=>notifyModal(a);
   }
 
   /* ════════════════════════════════════════════════════════
@@ -735,7 +1026,9 @@
   route('final', () => {
     destroyCharts();
     setTop('최종 선발', '트랙별 인터뷰 점수 순위 · 선발 인원(쿼터) 적용',
-      `<button class="btn btn-primary" id="btnFinal">${ico('trophy')}최종 선발 확정</button>`);
+      `<button class="btn btn-ghost" id="btnFinalXlsx">${ico('download')}결과 Excel</button>
+       <button class="btn btn-primary" id="btnFinal">${ico('trophy')}최종 선발 확정</button>`);
+    $('#btnFinalXlsx').onclick = exportExcel;
     renderFinal();
     $('#btnFinal').onclick = () => {
       modal({ title:'최종 선발 확정', icon:'trophy', iconBg:'var(--purple)',
@@ -777,7 +1070,8 @@
           <td><div class="row-flex"><div class="avatar" style="width:30px;height:30px;font-size:11px;background:${avaColor(c.a.name)}">${esc(initials(c.a.name))}</div><div class="cell-name">${esc(c.a.name)}</div></div></td>
           <td>${c.ev?`<span class="score-pill" style="color:${scoreColor(c.ev.total,maxT)}">${c.ev.total}<small style="color:var(--text-mute);font-size:10px"> /${maxT}</small></span>`:'<span class="muted">미평가</span>'}</td>
           <td>${stageBadge(stg)}</td>
-          <td><a class="btn btn-ghost btn-sm" href="#/applicant/${c.a.id}">상세${ico('chevR')}</a></td>
+          <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" data-notify="${c.a.id}">${ico('send')}</button>
+            <a class="btn btn-ghost btn-sm" href="#/applicant/${c.a.id}">상세${ico('chevR')}</a></td>
         </tr>`;
       }).join('');
       return `<div class="card chart-card">
@@ -794,7 +1088,8 @@
     }).join('');
 
     $('#view').innerHTML = stats + `<div class="grid" style="gap:18px">${blocks}</div>`;
-    $$('#view tbody tr[data-id]').forEach(tr=>tr.onclick=e=>{ if(e.target.closest('a'))return; location.hash='#/applicant/'+tr.dataset.id; });
+    $$('#view [data-notify]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); const a=S.getApplicant(b.dataset.notify); if(a) notifyModal(a); });
+    $$('#view tbody tr[data-id]').forEach(tr=>tr.onclick=e=>{ if(e.target.closest('a')||e.target.closest('button'))return; location.hash='#/applicant/'+tr.dataset.id; });
   }
 
   /* ════════════════════════════════════════════════════════
@@ -982,6 +1277,19 @@
         ${critTable('doc',cfg.docCriteria,'#00A99D')}
         ${critTable('itv',cfg.itvCriteria,'#8C5BE6')}
       </div>
+      <div class="card chart-card" style="margin-top:18px">
+        <div class="section-title"><span class="dot" style="background:var(--purple)"></span>AI 고도화 (선택)</div>
+        <div class="cell-sub" style="margin-top:6px">키를 비워두면 모든 AI 기능은 <strong>규칙·템플릿 기반</strong>으로 동작합니다. 키를 입력하면 자소서 요약·면접질문이 Claude로 고도화됩니다.</div>
+        <div class="split-2" style="margin-top:14px">
+          <div class="field"><label>Anthropic API 키 (선택)</label><input class="inp" id="aiKey" type="password" placeholder="sk-ant-..." value="${window.AI&&window.AI.getKey()?'••••••••••••':''}"></div>
+          <div class="field"><label>모델</label>
+            <select class="inp" id="aiModel">
+              ${['claude-sonnet-4-6','claude-opus-4-8','claude-haiku-4-5-20251001'].map(m=>`<option value="${m}" ${window.AI&&window.AI.getModel()===m?'selected':''}>${m}</option>`).join('')}
+            </select></div>
+        </div>
+        <div class="note warn" style="margin-top:4px">⚠ 이 앱은 백엔드가 없는 관리자 내부 도구입니다. API 키는 브라우저(localStorage)에 저장되며 브라우저에서 직접 호출되므로, <strong>신뢰된 기기에서만</strong> 사용하세요. 운영 배포 시에는 서버 프록시 사용을 권장합니다.</div>
+        <div style="margin-top:10px"><button class="btn btn-ghost" id="aiClear">${ico('trash')}키 삭제</button></div>
+      </div>
       <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
         <button class="btn btn-primary" id="saveSettings">${ico('check')}설정 저장</button>
       </div>`;
@@ -1014,8 +1322,15 @@
       });
       const quota={}; $$('#view [data-quota]').forEach(i=>quota[i.dataset.quota]=Number(i.value)||0);
       S.updateConfig({ docPassCut:Number($('#docCut').value)||0, itvPassCut:Number($('#itvCut').value)||0, finalQuota:quota });
+      // AI 설정
+      if (window.AI){
+        const k=$('#aiKey').value.trim();
+        if (k && !/^•+$/.test(k)) window.AI.setKey(k);   // 마스킹된 값이 아니면 갱신
+        window.AI.setModel($('#aiModel').value);
+      }
       toast('설정이 저장되었습니다','ok'); renderSettings(); renderSidebar('settings');
     };
+    const clr=$('#aiClear'); if(clr) clr.onclick=()=>{ if(window.AI) window.AI.setKey(''); toast('API 키를 삭제했습니다','ok'); renderSettings(); };
   }
 
   /* ───────────────── 시작 ───────────────── */

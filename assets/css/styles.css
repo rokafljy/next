@@ -345,10 +345,109 @@ input[type=range].slider::-moz-range-thumb { width:18px; height:18px; border-rad
 .note { background:#f0fbfa; border:1px solid #c8ece9; border-radius:10px; padding:13px 16px; font-size:12.5px; color:var(--teal-dark); }
 .note.warn { background:#fdf6e9; border-color:#f3e0bb; color:#9a6f1a; }
 
+/* ─── 사이드바 심사위원 스위처 ─── */
+.sb-reviewer { margin:8px 14px 0; padding:11px 13px; display:flex; align-items:center; gap:11px;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.10); border-radius:11px; cursor:pointer; transition:background .15s; }
+.sb-reviewer:hover { background:rgba(255,255,255,0.11); }
+.rv-ava { width:32px; height:32px; border-radius:9px; background:var(--teal); color:#fff; display:grid; place-items:center; font-weight:800; font-size:12px; flex-shrink:0; }
+.rv-info { flex:1; min-width:0; } .rv-info .rv-label { font-size:10px; color:rgba(255,255,255,0.42); display:block; }
+.rv-info strong { font-size:13px; color:#fff; }
+.rv-ic { width:15px; height:15px; color:rgba(255,255,255,0.4); }
+
+/* ─── 다음 할일 추천 카드 ─── */
+.action-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.action-card { display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px;
+  border:1px solid var(--gray-2); background:color-mix(in srgb, var(--ac) 5%, #fff); transition:transform .15s, box-shadow .15s; }
+.action-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.action-card .ac-ic { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; color:#fff; background:var(--ac); flex-shrink:0; }
+.action-card .ac-ic svg { width:19px; height:19px; }
+.ac-body { flex:1; min-width:0; } .ac-title { font-size:13.5px; font-weight:700; }
+.ac-desc { font-size:11.5px; color:var(--text-mute); margin-top:1px; }
+.ac-cnt { font-size:22px; font-weight:900; color:var(--ac); letter-spacing:-1px; }
+
+/* ─── 칸반 보드 ─── */
+.kanban { display:flex; gap:14px; overflow-x:auto; padding-bottom:14px; align-items:flex-start; }
+.kanban-col { flex:0 0 248px; background:var(--gray-1); border-radius:13px; border:1px solid var(--gray-2); display:flex; flex-direction:column; max-height:calc(100vh - 200px); }
+.kanban-col-head { display:flex; align-items:center; gap:8px; padding:13px 15px; border-bottom:1px solid var(--gray-2); font-size:13px; }
+.kanban-col-head .kc-dot { width:9px; height:9px; border-radius:3px; background:var(--cc); }
+.kanban-col-head .kc-count { margin-left:auto; background:#fff; border:1px solid var(--gray-2); color:var(--text-sub); font-weight:700; font-size:11px; padding:1px 9px; border-radius:100px; }
+.kanban-drop { padding:10px; display:flex; flex-direction:column; gap:9px; overflow-y:auto; min-height:80px; flex:1; transition:background .12s; }
+.kanban-drop.drop-target { background:#e6f7f5; outline:2px dashed var(--teal-light); outline-offset:-6px; border-radius:10px; }
+.kanban-empty { text-align:center; color:var(--gray-4); font-size:12px; padding:18px 0; }
+.kanban-card { background:#fff; border:1px solid var(--gray-2); border-radius:11px; padding:12px 13px; cursor:grab;
+  box-shadow:0 1px 4px rgba(11,31,58,0.05); transition:box-shadow .15s, transform .1s; }
+.kanban-card:hover { box-shadow:var(--shadow-md); }
+.kanban-card.dragging { opacity:.5; transform:rotate(1.5deg); cursor:grabbing; }
+.kanban-card .kc-top { display:flex; align-items:center; gap:9px; }
+.kanban-card .kc-name { font-weight:700; font-size:13.5px; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.kanban-card .kc-score { font-weight:800; font-size:14px; font-variant-numeric:tabular-nums; }
+.kanban-card .kc-track { display:flex; align-items:center; gap:5px; font-size:11px; font-weight:600; margin-top:7px; }
+.kanban-card .kc-track .d { width:6px; height:6px; border-radius:50%; }
+.kanban-card .kc-meta { font-size:10.5px; color:var(--text-mute); margin-top:5px; display:flex; align-items:center; gap:4px; }
+.kanban-card .kc-meta svg { width:12px; height:12px; }
+
+/* ─── 다중 심사위원 요약 ─── */
+.reviewer-summary { padding:14px 24px; background:linear-gradient(90deg, rgba(0,169,157,0.05), transparent); border-bottom:1px solid var(--gray-2); display:flex; gap:20px; align-items:center; flex-wrap:wrap; }
+.rs-agg { display:flex; align-items:center; gap:16px; }
+.rs-avg { text-align:center; } .rs-avg .rs-n { font-size:28px; font-weight:900; letter-spacing:-1px; line-height:1; }
+.rs-avg .rs-l { font-size:10.5px; color:var(--text-mute); display:block; margin-top:2px; }
+.rs-div { width:1px; height:36px; background:var(--gray-2); }
+.rs-meta { font-size:12px; color:var(--text-sub); } .rs-meta strong { color:var(--text-main); }
+.rs-meta .rs-warn { color:var(--red); font-weight:700; }
+.rs-list { display:flex; gap:8px; flex-wrap:wrap; flex:1; justify-content:flex-end; }
+.rs-item { display:flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--gray-2); border-radius:100px; padding:4px 11px 4px 4px; font-size:12px; }
+.rs-item.me { border-color:var(--teal); background:#f0fbfa; }
+.rs-ava { width:22px; height:22px; border-radius:50%; color:#fff; display:grid; place-items:center; font-size:10px; font-weight:800; }
+.rs-rv { font-weight:600; color:var(--text-sub); } .rs-sc { font-weight:800; }
+.eval-subhead { padding:12px 24px 0; font-size:12.5px; color:var(--text-sub); display:flex; align-items:center; gap:7px; }
+.eval-subhead svg { width:15px; height:15px; color:var(--teal-dark); }
+.eval-subhead strong { color:var(--navy); }
+
+/* ─── 루브릭 앵커 칩 ─── */
+.anchor-row { display:flex; gap:6px; margin-top:9px; flex-wrap:wrap; }
+.anchor { font-size:11px; font-weight:600; color:var(--text-sub); background:var(--gray-1); border:1px solid var(--gray-2);
+  border-radius:8px; padding:4px 9px; display:inline-flex; align-items:center; gap:5px; transition:all .12s; }
+.anchor:hover { border-color:var(--teal); color:var(--teal-dark); background:#f0fbfa; }
+.anchor small { font-weight:800; color:var(--text-mute); }
+.anchor:hover small { color:var(--teal); }
+
+/* ─── AI 한눈에 보기 카드 ─── */
+.ai-card { margin-top:18px; padding:0; overflow:hidden; }
+.ai-head { display:flex; align-items:center; gap:9px; padding:15px 20px; border-bottom:1px solid var(--gray-2);
+  background:linear-gradient(90deg, rgba(140,91,230,0.07), transparent); font-size:14px; }
+.ai-head svg { width:17px; height:17px; color:var(--purple); }
+.ai-head strong { font-weight:800; }
+.ai-tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; background:#eee3fb; color:#6f3fc0; }
+.ai-body { padding:16px 20px; }
+.ai-stats { display:flex; gap:16px; font-size:12px; color:var(--text-sub); margin-bottom:11px; }
+.ai-stats strong { color:var(--navy); font-size:14px; }
+.ai-kw { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.ai-kw .kw { font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:100px; background:#dcf5f3; color:var(--teal-dark); }
+.ai-hl { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.ai-hl li { font-size:12.5px; color:var(--text-sub); line-height:1.55; padding-left:18px; position:relative; }
+.ai-hl li::before { content:'✦'; position:absolute; left:0; color:var(--purple); font-size:11px; top:2px; }
+.ai-llm { font-size:13px; color:var(--text-sub); line-height:1.8; white-space:pre-wrap; }
+
+/* ─── 추천 면접 질문 ─── */
+.qpanel { margin:0 24px 8px; border:1px solid var(--gray-2); border-radius:12px; overflow:hidden; }
+.qpanel-head { display:flex; align-items:center; gap:9px; padding:12px 16px; background:var(--gray-1); font-size:13px; }
+.qpanel-head svg { width:15px; height:15px; color:var(--purple); }
+.qbox { padding:14px 18px; }
+.qlist { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:9px; }
+.qlist li { font-size:13px; color:var(--text-sub); line-height:1.6; }
+
 @media (max-width:1180px){
   .kpi-grid { grid-template-columns:repeat(2,1fr); }
   .chart-grid, .detail-grid, .split-2 { grid-template-columns:1fr; }
   .profile-card { position:static; }
+  .reviewer-summary .rs-list { justify-content:flex-start; }
+}
+
+/* ─── 인쇄 (결과 → PDF 저장) ─── */
+@media print {
+  .sidebar, .topbar, .toast-wrap, .btn, .action-grid, .kanban { display:none !important; }
+  .main { margin-left:0; } .content { padding:0; }
+  .card { box-shadow:none; border-color:#ccc; break-inside:avoid; }
 }
 @media (max-width:760px){
   .sidebar { transform:translateX(-100%); transition:transform .2s; }

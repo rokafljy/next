@@ -43,13 +43,46 @@
   /* ── 상태 ──────────────────────────────────────────────── */
   let state = {
     applicants: [],
-    evals: {},      // { [id]: { doc:{scores,total,comment,reviewer,date}, itv:{...} } }
+    evals: {},      // { [id]: { doc:{reviews:[{reviewer,scores,total,comment,date}], total, scores, std, reviewerCount, date}, itv:{...} } }
     stages: {},     // { [id]: stageKey }
     config: null,
+    session: { reviewer: '심사위원1' }, // 현재 평가를 입력하는 심사위원
     meta: { uploadedName:'', uploadedAt:'', sourceTitle:'' },
   };
 
   function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+  /* ── 루브릭 앵커(점수구간 행동지표) ───────────────────── */
+  function defaultAnchors(max){
+    const b = max/4;
+    return [
+      { label:'탁월', min:Math.round(b*3), target:max,             desc:'기대를 크게 상회 — 명확한 근거·성과 제시' },
+      { label:'우수', min:Math.round(b*2), target:Math.round(b*2.5), desc:'기준을 충분히 충족 — 구체적 사례 있음' },
+      { label:'보통', min:Math.round(b*1), target:Math.round(b*1.5), desc:'기본 요건 충족 — 일반적 수준' },
+      { label:'미흡', min:0,               target:Math.round(b*0.5), desc:'기준 미달 — 근거 부족/모호' },
+    ];
+  }
+  function ensureAnchors(){
+    if (!state.config) return;
+    ['docCriteria','itvCriteria'].forEach(k=>{
+      (state.config[k]||[]).forEach(c=>{ if(!c.anchors || !c.anchors.length) c.anchors = defaultAnchors(c.max); });
+    });
+  }
+
+  /* ── 평가 데이터 마이그레이션(단일 review → reviews 배열) ─ */
+  function migrateEvals(){
+    Object.keys(state.evals||{}).forEach(id=>{
+      const e = state.evals[id]; if(!e) return;
+      ['doc','itv'].forEach(p=>{
+        const o = e[p];
+        if (o && !o.reviews) {
+          e[p] = { reviews:[{ reviewer:o.reviewer||'심사위원1', scores:o.scores||{}, total:o.total||0,
+                              comment:o.comment||'', date:o.date||new Date().toISOString() }] };
+          recomputeAgg(p, e);
+        }
+      });
+    });
+  }
 
   function load() {
     const raw = localStorage.getItem(LS_KEY);
@@ -58,6 +91,9 @@
         const parsed = JSON.parse(raw);
         state = Object.assign(state, parsed);
         if (!state.config) state.config = deepClone(DEFAULT_CONFIG);
+        if (!state.session) state.session = { reviewer:'심사위원1' };
+        ensureAnchors();
+        migrateEvals();
         return;
       } catch (e) { console.warn('상태 복원 실패, 초기화', e); }
     }
@@ -71,6 +107,8 @@
     state.stages = {};
     seed.forEach(a => state.stages[a.id] = 'applied');
     state.config = deepClone(DEFAULT_CONFIG);
+    ensureAnchors();
+    state.session = { reviewer:'심사위원1' };
     state.meta = { uploadedName:'통합신청자명단 (시드)', uploadedAt:new Date().toISOString(),
       sourceTitle:'2026 청년일경험지원사업 [커넥팅더닷츠]' };
     save();
@@ -126,33 +164,70 @@
     return state.evals[id];
   }
 
-  /* ── 평가 저장 ─────────────────────────────────────────── */
+  /* ── 평가 저장 (다중 심사위원) ─────────────────────────── */
   function totalOf(scores, criteria) {
     return criteria.reduce((s,c) => s + (Number(scores[c.id]) || 0), 0);
   }
   function maxTotal(criteria){ return criteria.reduce((s,c)=>s+c.max,0); }
 
-  function saveDocEval(id, scores, comment, reviewer) {
-    const total = totalOf(scores, state.config.docCriteria);
+  const getReviewer = () => (state.session && state.session.reviewer) || '심사위원1';
+  function setReviewer(name){ state.session = state.session || {}; state.session.reviewer = (name||'').trim() || '심사위원1'; save(); }
+  const round1 = n => Math.round(n*10)/10;
+
+  // reviews[] → 평균 점수/항목별 평균/표준편차(편차) 집계를 같은 객체에 기록 (기존 .total/.scores 읽기 호환)
+  function recomputeAgg(phase, e){
+    const obj = e[phase];
+    if (!obj || !obj.reviews || !obj.reviews.length){ e[phase] = null; return; }
+    const crits = phase==='doc' ? state.config.docCriteria : state.config.itvCriteria;
+    const n = obj.reviews.length;
+    const scores = {};
+    crits.forEach(c => { scores[c.id] = round1(obj.reviews.reduce((s,r)=> s + (Number(r.scores[c.id])||0), 0)/n); });
+    const totals = obj.reviews.map(r => Number(r.total)||0);
+    const mean = totals.reduce((a,b)=>a+b,0)/n;
+    const std = Math.sqrt(totals.reduce((s,t)=> s + (t-mean)**2, 0)/n);
+    obj.scores = scores;
+    obj.total = round1(mean);
+    obj.std = round1(std);
+    obj.reviewerCount = n;
+    obj.date = obj.reviews.map(r=>r.date).sort().slice(-1)[0];
+    obj.reviewer = n===1 ? obj.reviews[0].reviewer : `${n}명 평균`;
+  }
+
+  function upsertReview(phase, id, scores, comment, reviewer, criteria){
+    reviewer = (reviewer||getReviewer()).trim() || '심사위원1';
     const e = evalOf(id);
-    e.doc = { scores:deepClone(scores), total, comment:comment||'', reviewer:reviewer||'심사위원',
-              date:new Date().toISOString() };
-    // 단계 전이: 신청완료 → 서류심사중
-    const cur = stageOf(id);
-    if (cur === 'applied') state.stages[id] = 'doc_review';
+    if (!e[phase] || !e[phase].reviews) e[phase] = { reviews:[] };
+    const total = totalOf(scores, criteria);
+    const rec = { reviewer, scores:deepClone(scores), total, comment:comment||'', date:new Date().toISOString() };
+    const ex = e[phase].reviews.find(r => r.reviewer === reviewer);
+    if (ex) Object.assign(ex, rec); else e[phase].reviews.push(rec);
+    recomputeAgg(phase, e);
+    return e[phase].total;
+  }
+
+  function saveDocEval(id, scores, comment, reviewer) {
+    const total = upsertReview('doc', id, scores, comment, reviewer, state.config.docCriteria);
+    if (stageOf(id) === 'applied') state.stages[id] = 'doc_review';
+    save();
+    return total;
+  }
+  function saveItvEval(id, scores, comment, reviewer) {
+    const total = upsertReview('itv', id, scores, comment, reviewer, state.config.itvCriteria);
+    if (stageOf(id) === 'interview') state.stages[id] = 'interview_done';
     save();
     return total;
   }
 
-  function saveItvEval(id, scores, comment, reviewer) {
-    const total = totalOf(scores, state.config.itvCriteria);
-    const e = evalOf(id);
-    e.itv = { scores:deepClone(scores), total, comment:comment||'', reviewer:reviewer||'심사위원',
-              date:new Date().toISOString() };
-    const cur = stageOf(id);
-    if (cur === 'interview') state.stages[id] = 'interview_done';
-    save();
-    return total;
+  // 특정 단계의 집계 + 현재 심사위원의 개별 평가
+  function evalAggregate(id, phase){
+    const e = state.evals[id]; const o = e && e[phase];
+    if (!o || !o.reviews || !o.reviews.length) return null;
+    return { avgTotal:o.total, perCritAvg:o.scores, std:o.std, reviewerCount:o.reviewerCount, reviews:o.reviews };
+  }
+  function myReview(id, phase){
+    const e = state.evals[id]; const o = e && e[phase];
+    if (!o || !o.reviews) return null;
+    return o.reviews.find(r => r.reviewer === getReviewer()) || null;
   }
 
   function setStage(id, stage) {
@@ -215,6 +290,7 @@
   function addCriterion(group, crit){
     crit.id = (group==='doc'?'d_':'i_') + 'x' + Date.now().toString(36);
     crit.kind = 'add';
+    if (!crit.anchors) crit.anchors = defaultAnchors(crit.max);
     state.config[group==='doc'?'docCriteria':'itvCriteria'].push(crit);
     save(); return crit.id;
   }
@@ -226,7 +302,11 @@
   function updateCriterion(group, id, patch){
     const k = group==='doc'?'docCriteria':'itvCriteria';
     const c = state.config[k].find(x=>x.id===id);
-    if (c) Object.assign(c, patch);
+    if (c) {
+      const maxChanged = patch.max != null && Number(patch.max) !== c.max;
+      Object.assign(c, patch);
+      if (maxChanged) c.anchors = defaultAnchors(c.max); // 배점 변경 시 앵커 재생성
+    }
     save();
   }
 
@@ -295,11 +375,57 @@
   function recentActivity(n) {
     const acts = [];
     state.applicants.forEach(a => {
-      const e = state.evals[a.id];
-      if (e?.doc) acts.push({ id:a.id, name:a.name, track:a.track, type:'서류', total:e.doc.total, date:e.doc.date, reviewer:e.doc.reviewer });
-      if (e?.itv) acts.push({ id:a.id, name:a.name, track:a.track, type:'인터뷰', total:e.itv.total, date:e.itv.date, reviewer:e.itv.reviewer });
+      const e = state.evals[a.id]; if(!e) return;
+      ['doc','itv'].forEach(p=>{
+        const o = e[p]; if(!o || !o.reviews) return;
+        const label = p==='doc'?'서류':'인터뷰';
+        o.reviews.forEach(r => acts.push({ id:a.id, name:a.name, track:a.track, type:label,
+          total:r.total, date:r.date, reviewer:r.reviewer }));
+      });
     });
     return acts.sort((x,y)=> new Date(y.date)-new Date(x.date)).slice(0, n||8);
+  }
+
+  /* ── 다음 할일 추천 (현 단계에서 필요한 작업) ──────────── */
+  function nextActions(){
+    const apps = state.applicants;
+    const cnt = fn => apps.filter(fn).length;
+    const hasDoc = a => !!(state.evals[a.id] && state.evals[a.id].doc);
+    const hasItv = a => !!(state.evals[a.id] && state.evals[a.id].itv);
+    const out = [];
+    const docUnscored = cnt(a => ['applied','doc_review'].includes(stageOf(a.id)) && !hasDoc(a));
+    if (docUnscored) out.push({ icon:'doc', color:'#3B5BDB', title:'서류 평가 진행', desc:`${docUnscored}명 평가 대기`, count:docUnscored, route:'#/document' });
+    const scoredNotCut = cnt(a => ['applied','doc_review'].includes(stageOf(a.id)) && hasDoc(a));
+    if (scoredNotCut) out.push({ icon:'bolt', color:'#F5A623', title:'서류 합격선 적용', desc:`평가완료 ${scoredNotCut}명 합격선 미적용`, count:scoredNotCut, route:'#/document' });
+    const docPassWait = cnt(a => stageOf(a.id)==='doc_pass');
+    if (docPassWait) out.push({ icon:'arrow', color:'#00A99D', title:'인터뷰 대상 승급', desc:`서류합격 ${docPassWait}명 인터뷰 대기`, count:docPassWait, route:'#/interview' });
+    const itvWait = cnt(a => stageOf(a.id)==='interview' && !hasItv(a));
+    if (itvWait) out.push({ icon:'mic', color:'#8C5BE6', title:'인터뷰 평가 진행', desc:`${itvWait}명 인터뷰 평가 대기`, count:itvWait, route:'#/interview' });
+    const finalWait = cnt(a => stageOf(a.id)==='interview_done');
+    if (finalWait) out.push({ icon:'trophy', color:'#2BB673', title:'최종 선발 확정', desc:`인터뷰완료 ${finalWait}명 최종 미확정`, count:finalWait, route:'#/final' });
+    let disagree = 0;
+    apps.forEach(a => { const e=state.evals[a.id]; if(!e) return;
+      ['doc','itv'].forEach(p=>{ const o=e[p]; if(o && o.reviewerCount>=2 && o.std>=10) disagree++; }); });
+    if (disagree) out.push({ icon:'users', color:'#E8503A', title:'평가 편차 재검토', desc:`심사위원 점수차 큰 평가 ${disagree}건`, count:disagree, route:'#/applicants' });
+    const ineligible = cnt(a => a.privacyAgree!=='Y' || a.dataIssue==='Y');
+    if (ineligible) out.push({ icon:'x', color:'#E8503A', title:'적격요건 확인', desc:`개인정보 미동의·기재이상 ${ineligible}명`, count:ineligible, route:'#/applicants' });
+    return out;
+  }
+
+  /* ── Export 평탄화 행 ─────────────────────────────────── */
+  function exportRows(){
+    return state.applicants.map(a => {
+      const e = state.evals[a.id] || {};
+      return {
+        연번:a.no, 이름:a.name, 트랙:a.track, 프로그램:a.program,
+        학력:a.edu, 학교:a.school, 학과:a.major||a.college,
+        연락처:a.phone, 이메일:a.email,
+        개인정보동의:a.privacyAgree, 첨부파일:a.hasFile, 기재이상:a.dataIssue,
+        단계: stageInfo(stageOf(a.id)).label,
+        서류평균: e.doc? e.doc.total : '', 서류심사위원수: e.doc? e.doc.reviewerCount : '', 서류편차: e.doc? e.doc.std : '',
+        인터뷰평균: e.itv? e.itv.total : '', 인터뷰심사위원수: e.itv? e.itv.reviewerCount : '', 인터뷰편차: e.itv? e.itv.std : '',
+      };
+    });
   }
 
   window.Store = {
@@ -308,9 +434,10 @@
     stageOf, stageInfo, allStages, STAGE_ORDER,
     evalOf, saveDocEval, saveItvEval, setStage,
     totalOf, maxTotal,
+    getReviewer, setReviewer, evalAggregate, myReview, defaultAnchors,
     applyDocCut, promoteToInterview, applyFinalSelection,
     updateConfig, addCriterion, removeCriterion, updateCriterion,
-    stats, trackProgress, recentActivity,
+    stats, trackProgress, recentActivity, nextActions, exportRows,
     DEFAULT_CONFIG,
   };
 })();
