@@ -60,7 +60,7 @@
     bell:'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0',
     grip:'M9 5h.01 M9 12h.01 M9 19h.01 M15 5h.01 M15 12h.01 M15 19h.01',
   };
-  const ico = (n, cls='') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${(I[n]||'').split(' M').map((p,i)=>`<path d="${i?'M'+p:p}"/>`).join('')}</svg>`;
+  const ico = (n, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${(I[n]||'').split(' M').map((p,i)=>`<path d="${i?'M'+p:p}"/>`).join('')}</svg>`;
 
   /* 토스트 */
   function toast(msg, type='') {
@@ -156,6 +156,14 @@
       } });
   }
 
+  /* ───────────────── 테마 (라이트/다크) ───────────────── */
+  const THEME_KEY = 'cdc_theme';
+  function getTheme(){ try { return localStorage.getItem(THEME_KEY) || 'light'; } catch(e){ return 'light'; } }
+  function applyTheme(t){ document.documentElement.setAttribute('data-theme', t==='dark'?'dark':'light');
+    try { localStorage.setItem(THEME_KEY, t); } catch(e){} }
+  function toggleTheme(){ applyTheme(getTheme()==='dark'?'light':'dark'); navigate(); }
+  const isDark = () => getTheme()==='dark';
+
   /* ───────────────── 사이드바 ───────────────── */
   const NAV = [
     { group:'현황', items:[
@@ -201,6 +209,10 @@
         <div class="sb-sub">커넥팅더닷츠 · 2026</div>
       </div>
       <nav class="sb-nav">${groups}</nav>
+      <div class="theme-toggle" id="themeToggle" title="라이트/다크 모드 전환">
+        ${ico(isDark()?'spark':'star')}<span>${isDark()?'다크 모드':'라이트 모드'}</span>
+        <span class="tt-track"></span>
+      </div>
       <div class="sb-reviewer" id="sbReviewer" title="현재 심사위원 — 클릭하여 변경">
         <div class="rv-ava">${esc(initials(S.getReviewer()))}</div>
         <div class="rv-info"><span class="rv-label">현재 심사위원</span><strong>${esc(S.getReviewer())}</strong></div>
@@ -211,6 +223,7 @@
         주관 · 산학협력단 운영
       </div>`;
     const rv = $('#sbReviewer'); if (rv) rv.onclick = openReviewerModal;
+    const tt = $('#themeToggle'); if (tt) tt.onclick = toggleTheme;
   }
 
   function openReviewerModal(){
@@ -397,18 +410,21 @@
       ['#3B5BDB','#00A99D','#F5A623','#8C5BE6','#E8503A','#2BB673','#748FFC'], true);
   });
 
+  function chartTheme(){ return isDark()
+    ? { tick:'#A7B4CA', mute:'#7C8AA6', grid:'rgba(255,255,255,0.07)', border:'#161f30' }
+    : { tick:'#5A6A82', mute:'#8A98AE', grid:'#F0F3F8', border:'#FFFFFF' }; }
   function drawBar(id, labels, data, colors){
-    const ctx = $('#'+id); if(!ctx) return;
+    const ctx = $('#'+id); if(!ctx) return; const t=chartTheme();
     charts.push(new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ data, backgroundColor:colors, borderRadius:7, maxBarThickness:46 }]},
       options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-        scales:{ x:{ grid:{display:false}, ticks:{ font:{family:'Noto Sans KR',size:11}, color:'#5A6A82' } },
-          y:{ beginAtZero:true, grid:{color:'#F0F3F8'}, ticks:{ precision:0, font:{size:11}, color:'#8A98AE' } } } } }));
+        scales:{ x:{ grid:{display:false}, ticks:{ font:{family:'Noto Sans KR',size:11}, color:t.tick } },
+          y:{ beginAtZero:true, grid:{color:t.grid}, ticks:{ precision:0, font:{size:11}, color:t.mute } } } } }));
   }
   function drawDoughnut(id, labels, data, colors, legendRight){
-    const ctx = $('#'+id); if(!ctx) return;
-    charts.push(new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:3, borderColor:'#fff' }]},
+    const ctx = $('#'+id); if(!ctx) return; const t=chartTheme();
+    charts.push(new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:3, borderColor:t.border }]},
       options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
-        plugins:{ legend:{ position: legendRight?'right':'bottom', labels:{ font:{family:'Noto Sans KR',size:11.5}, color:'#5A6A82', padding:12, usePointStyle:true, pointStyle:'circle', boxWidth:8 } } } } }));
+        plugins:{ legend:{ position: legendRight?'right':'bottom', labels:{ font:{family:'Noto Sans KR',size:11.5}, color:t.tick, padding:12, usePointStyle:true, pointStyle:'circle', boxWidth:8 } } } } }));
   }
 
   /* ════════════════════════════════════════════════════════
@@ -1334,6 +1350,7 @@
   }
 
   /* ───────────────── 시작 ───────────────── */
+  applyTheme(getTheme());
   S.load();
   if (!location.hash) location.hash = '#/dashboard';
   navigate();
